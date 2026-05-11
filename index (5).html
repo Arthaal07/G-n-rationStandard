@@ -1,0 +1,2097 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="GenerationStandard">
+<meta name="theme-color" content="#1A2E4A">
+<link rel="manifest" id="pwa-manifest">
+<title>GenerationStandard</title>
+<style>
+:root{
+  --bl:#1A2E4A;--bl2:#24405f;--bl3:#0d1f33;
+  --or:#E8711A;--or2:#f5853a;--orl:#fff3e8;--ord:#c45a0e;
+  --vt:#16693a;--vtl:#e8f5ee;
+  --rg:#cc0000;--rgl:#fff0f0;
+  --vi:#5B2A8C;--vil:#f3eeff;
+  --jn:#FFD700;--jnl:#FFFEF0;
+  --gr:#64748b;--grl:#e2e8f0;--grll:#f8fafc;
+  --tx:#0f172a;--tx2:#475569;--bg:#eef1f7;
+  --r:8px;--rl:14px;
+  --sh:0 2px 8px rgba(15,34,64,.10);
+  --sh2:0 6px 24px rgba(15,34,64,.18);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--bg);font-family:'Segoe UI',system-ui,Arial,sans-serif;color:var(--tx);font-size:14px}
+#app{display:flex;flex-direction:column;height:100%;max-width:520px;margin:0 auto;background:#fff;box-shadow:var(--sh2)}
+
+/* Topbar */
+.topbar{background:var(--bl);padding:10px 14px;display:flex;align-items:center;gap:10px;flex-shrink:0}
+.logo{font-size:.9rem;font-weight:700;color:#fff;flex:1}.logo b{color:var(--or)}
+.topbar-badge{background:var(--rg);color:#fff;border-radius:10px;font-size:.6rem;font-weight:700;padding:2px 7px}
+
+/* Nav */
+.bnav{background:var(--bl3);display:flex;flex-shrink:0;border-top:1px solid rgba(255,255,255,.07);padding-bottom:env(safe-area-inset-bottom,0)}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:7px 4px 5px;cursor:pointer;color:rgba(255,255,255,.35);font-size:.5rem;font-weight:700;letter-spacing:.05em;border-top:2px solid transparent;transition:.15s;position:relative}
+.ni.on{color:var(--or);border-top-color:var(--or)}
+.ni-ico{font-size:.95rem}
+.ni-badge{position:absolute;top:4px;right:calc(50% - 16px);background:var(--rg);color:#fff;border-radius:10px;font-size:.55rem;font-weight:700;padding:1px 5px}
+
+/* Pages */
+.page{flex:1;overflow-y:auto;display:none;overscroll-behavior:contain}
+.page.on{display:flex;flex-direction:column}
+
+/* Cards */
+.card{background:#fff;border-radius:var(--rl);box-shadow:var(--sh);padding:14px;margin:10px 10px 0}
+.card:last-child{margin-bottom:10px}
+.card-ttl{font-size:.86rem;font-weight:700;color:var(--bl);margin-bottom:3px}
+.card-sub{font-size:.71rem;color:var(--gr);line-height:1.5;margin-bottom:10px}
+
+/* Forms */
+.lbl{font-size:.68rem;font-weight:600;color:var(--tx2);margin-bottom:3px;display:block}
+.inp{width:100%;padding:9px 11px;border:1.5px solid var(--grl);border-radius:var(--r);font-family:inherit;font-size:.84rem;color:var(--tx);background:var(--grll);outline:none;transition:.15s;-webkit-appearance:none}
+.inp:focus{border-color:var(--or);background:#fff}
+textarea.inp{resize:none;line-height:1.5}
+.fr{margin-bottom:9px}
+.f2{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.f3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px}
+
+/* Buttons */
+.btn{display:flex;align-items:center;justify-content:center;gap:5px;padding:10px 14px;border-radius:var(--r);border:none;font-family:inherit;font-size:.8rem;font-weight:700;cursor:pointer;transition:.15s;width:100%;margin-bottom:6px}
+.bp{background:var(--or);color:#fff;box-shadow:0 3px 10px rgba(232,113,26,.28)}
+.bp:active{transform:scale(.97)}
+.bs{background:var(--grll);color:var(--tx2);border:1.5px solid var(--grl)}
+.bb{background:var(--bl);color:#fff}
+.bv{background:var(--vtl);color:var(--vt);border:1.5px solid var(--vt)}
+.br{background:var(--rgl);color:var(--rg);border:1.5px solid var(--rg)}
+.bsm{padding:6px 10px;font-size:.72rem;width:auto;margin-bottom:0;border-radius:6px}
+.btn-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+
+/* Badges */
+.bdg{display:inline-block;padding:2px 7px;border-radius:20px;font-size:.62rem;font-weight:700}
+.bd-brouillon{background:#eef2ff;color:#4f46e5}
+.bd-attente{background:#fef9c3;color:#92400e}
+.bd-valide{background:var(--vtl);color:var(--vt)}
+.bd-archive{background:var(--grl);color:var(--gr)}
+.bd-majour{background:var(--orl);color:var(--or)}
+
+/* Slider */
+.slider-wrap{margin-bottom:10px}
+.slider-labels{display:flex;justify-content:space-between;font-size:.62rem;color:var(--gr);margin-bottom:3px}
+input[type=range]{width:100%;-webkit-appearance:none;height:4px;border-radius:3px;background:linear-gradient(to right,var(--or) 50%,var(--grl) 50%);outline:none;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--or);border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.2)}
+.slider-val{text-align:center;font-size:.7rem;font-weight:700;color:var(--or);margin-top:2px}
+
+/* Type selector */
+.type-grid{display:flex;flex-direction:column;gap:7px;margin-bottom:10px}
+.type-card{border:1.5px solid var(--grl);border-radius:var(--r);padding:9px 11px;cursor:pointer;transition:.15s;display:flex;align-items:flex-start;gap:9px}
+.type-card.on{border-color:var(--or);background:var(--orl)}
+.type-ico{font-size:1.3rem;flex-shrink:0;margin-top:1px}
+.type-name{font-size:.8rem;font-weight:700;color:var(--bl);margin-bottom:1px}
+.type-desc{font-size:.7rem;color:var(--gr);line-height:1.4}
+
+/* Loader */
+.ldr{display:flex;flex-direction:column;align-items:center;gap:11px;padding:30px 14px;flex:1;justify-content:center}
+.sp{width:28px;height:28px;border:3px solid var(--grl);border-top-color:var(--or);border-radius:50%;animation:rot .7s linear infinite}
+@keyframes rot{to{transform:rotate(360deg)}}
+.ldm{font-size:.77rem;color:var(--gr);text-align:center;line-height:1.6}
+
+/* Toast */
+.tw{position:fixed;top:58px;left:50%;transform:translateX(-50%);z-index:999;display:flex;flex-direction:column;gap:5px;pointer-events:none;width:calc(100% - 24px);max-width:460px}
+.tst{padding:8px 13px;border-radius:8px;font-size:.77rem;font-weight:700;text-align:center;animation:tin .2s ease;box-shadow:var(--sh2)}
+.tst.ok{background:var(--vt);color:#fff}
+.tst.err{background:var(--rg);color:#fff}
+.tst.info{background:var(--bl);color:#fff}
+@keyframes tin{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+
+/* Empty */
+.empty{text-align:center;padding:28px 14px;color:var(--gr);flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.empty-i{font-size:2.2rem;margin-bottom:8px}
+.empty-t{font-size:.8rem;line-height:1.6}
+
+/* Sep */
+.sep{height:1px;background:var(--grl);margin:9px 0}
+
+/* ══════════════════════════════════════════
+   FI-00 PHAREC FORMAT
+   ══════════════════════════════════════════ */
+.fi00{background:#fff;margin:0;flex:1;overflow-y:auto}
+.fi00-wrap{padding:8px;min-height:100%}
+
+/* En-tête orange */
+.fi-hdr{background:var(--or);border-radius:8px 8px 0 0;overflow:hidden}
+.fi-hdr-r1{display:flex;align-items:stretch}
+.fi-hdr-title{flex:1;padding:6px 9px;font-size:.78rem;font-weight:700;color:#fff}
+.fi-hdr-ref{padding:6px 9px;font-size:.72rem;font-weight:700;color:#fff;text-align:right;min-width:90px;border-left:1px solid rgba(255,255,255,.2)}
+.fi-hdr-r2{padding:4px 9px;font-size:.72rem;color:rgba(255,255,255,.9);border-top:1px solid rgba(255,255,255,.2);font-style:italic}
+.fi-hdr-r3{display:flex;border-top:1px solid rgba(255,255,255,.2)}
+.fi-hdr-cell{flex:1;padding:4px 9px;font-size:.65rem;font-weight:600;color:rgba(255,255,255,.85);border-right:1px solid rgba(255,255,255,.2)}
+.fi-hdr-cell:last-child{border-right:none}
+
+/* Zone milieu */
+.fi-mid{display:flex;border-left:2px solid #ddd;border-right:2px solid #ddd}
+.fi-photo-zone{width:42%;border-right:1px solid #ddd;min-height:100px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;position:relative;overflow:hidden;background:var(--grll)}
+.fi-photo-zone img{width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0}
+.fi-photo-placeholder{display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--rg);font-size:.66rem;z-index:1}
+.fi-photo-placeholder span{font-size:1.4rem}
+.fi-right{flex:1;display:flex;flex-direction:column}
+
+/* Temps alloué + Plans */
+.fi-sect-title{padding:3px 7px;font-size:.67rem;font-weight:700;color:var(--rg);border-bottom:1px solid #ddd;background:#fff}
+.fi-row-hdr{display:flex;background:#ddd}
+.fi-row-hdr div{flex:1;padding:2px 5px;font-size:.6rem;font-weight:700;text-align:center;border-right:1px solid #bbb}
+.fi-row-hdr div:last-child{border-right:none}
+.fi-row{display:flex;border-bottom:1px solid #eee}
+.fi-row div{flex:1;padding:3px 5px;font-size:.68rem;border-right:1px solid #eee;min-height:18px;cursor:text;outline:none}
+.fi-row div:last-child{border-right:none}
+.fi-row div:focus{background:var(--orl)}
+.fi-row div[contenteditable=true]:empty:before{content:attr(data-ph);color:#bbb;font-style:italic}
+
+/* EPI */
+.fi-epi{border:1px solid #ddd;border-top:none;display:flex;align-items:center;gap:6px;padding:5px 8px;background:#fff;font-size:.65rem;flex-wrap:wrap}
+.fi-epi-ico{display:flex;align-items:center;gap:3px}
+.fi-epi-badge{display:inline-block;background:var(--rgl);color:var(--rg);border-radius:4px;padding:1px 5px;font-size:.6rem;font-weight:700}
+
+/* Tableau PHAREC */
+.fi-tab{width:100%;border-collapse:collapse;border:1px solid #ddd;border-top:none;font-size:.7rem}
+.fi-tab-hdr th{background:var(--jn);padding:4px 5px;font-weight:700;font-size:.65rem;border:1px solid #bbb;text-align:center}
+.fi-tab-sub th{font-size:.6rem;padding:2px 4px;border:1px solid #bbb;font-weight:700}
+.fi-tab-sub .sub-s{background:#ffe0e0;color:var(--rg)}
+.fi-tab-sub .sub-q{background:#e0ffe0;color:var(--vt)}
+.fi-tab-sub .sub-t{background:#e0e8ff;color:#1a2e99}
+.fi-tab td{border:1px solid #ddd;padding:0;vertical-align:top}
+.fi-tab tr:nth-child(even) td{background:var(--jnl)}
+.fi-tab tr:nth-child(odd) td{background:#fff}
+
+/* Cellules du tableau */
+.td-num{width:7%;text-align:center;font-weight:700;padding:4px 2px;font-size:.72rem;vertical-align:middle}
+.td-desc{width:37%}
+.td-ptcle{width:8%;text-align:center;vertical-align:middle}
+.td-pk{width:48%}
+
+/* Contenus éditables des cellules */
+.cell-edit{padding:4px 5px;min-height:44px;cursor:text;outline:none;line-height:1.4;width:100%}
+.cell-edit:focus{background:rgba(232,113,26,.06)}
+.cell-edit[contenteditable=true]:empty:before{content:attr(data-ph);color:#ccc;font-size:.65rem;font-style:italic}
+
+/* Photo dans cellule */
+.cell-photo{position:relative;cursor:pointer;display:flex;align-items:center;justify-content:center;min-height:60px;transition:.15s}
+.cell-photo:hover{background:rgba(232,113,26,.05)}
+.cell-photo img{max-width:100%;max-height:90px;object-fit:contain;display:block}
+.cell-photo-ph{display:flex;flex-direction:column;align-items:center;gap:3px;color:#ccc;font-size:.6rem;padding:8px}
+.cell-photo-ph span{font-size:1.1rem}
+.cell-photo-del{position:absolute;top:2px;right:2px;background:rgba(192,57,43,.8);color:#fff;border:none;border-radius:50%;width:16px;height:16px;font-size:.55rem;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:2}
+
+/* Pt clé selector */
+.ptcle-sel{width:100%;border:none;background:transparent;font-size:.65rem;font-weight:700;cursor:pointer;text-align:center;padding:2px;outline:none}
+.ptcle-s{color:var(--rg)}
+.ptcle-q{color:var(--vt)}
+.ptcle-t{color:#1a2e99}
+
+/* Boutons inline */
+.fi-add-row{background:none;border:1px dashed #ccc;width:100%;padding:5px;font-size:.68rem;color:var(--gr);cursor:pointer;transition:.15s;border-radius:0 0 6px 6px}
+.fi-add-row:hover{background:var(--orl);border-color:var(--or);color:var(--or)}
+.del-row-btn{position:absolute;top:2px;left:2px;background:rgba(192,57,43,.75);color:#fff;border:none;border-radius:50%;width:14px;height:14px;font-size:.5rem;cursor:pointer;display:none;align-items:center;justify-content:center;z-index:3;line-height:1}
+.fi-tab tr:hover .del-row-btn{display:flex}
+.td-num-wrap{position:relative;display:flex;align-items:center;justify-content:center;height:100%;padding:4px 2px}
+
+/* Barre d'actions FI-00 */
+.fi-actions{background:#fff;border-top:1px solid var(--grl);padding:8px 10px;display:flex;gap:7px;flex-wrap:wrap;align-items:center;flex-shrink:0}
+.fi-status{font-size:.68rem;font-weight:700;margin-right:auto}
+
+/* Biblio */
+.doc-item{padding:10px 12px;border-bottom:1px solid var(--grl);cursor:pointer;display:flex;align-items:flex-start;gap:9px;background:#fff;transition:.1s}
+.doc-item:active{background:var(--grll)}
+.doc-item-ref{font-family:monospace;font-size:.62rem;color:var(--gr)}
+.doc-item-title{font-weight:600;font-size:.83rem;margin:2px 0}
+.doc-item-meta{font-size:.68rem;color:var(--gr)}
+.doc-item-tags{display:flex;flex-wrap:wrap;gap:3px;margin-top:3px}
+.bib-filters{padding:8px 10px;background:#fff;border-bottom:1px solid var(--grl);display:flex;gap:7px}
+.bib-filters .inp{font-size:.78rem;padding:7px 10px}
+
+/* Tags */
+.tag{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:20px;font-size:.63rem;font-weight:700}
+.tag-del{background:none;border:none;cursor:pointer;font-size:.6rem;padding:0;opacity:.7}
+.tag-presets{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.tag-preset{padding:2px 8px;border-radius:20px;font-size:.63rem;font-weight:600;cursor:pointer;border:1px solid currentColor;opacity:.7;transition:.15s}
+.tag-preset:hover{opacity:1;transform:scale(1.05)}
+
+/* Formations */
+.form-item{padding:8px 0;border-bottom:1px solid var(--grl);font-size:.78rem}
+.form-item:last-child{border-bottom:none}
+.form-nom{font-weight:600}
+.form-meta{font-size:.68rem;color:var(--gr);margin-top:2px}
+
+/* Trace */
+.trace-item{display:flex;gap:8px;padding:6px 0;border-bottom:1px solid var(--grl);font-size:.75rem}
+.trace-item:last-child{border-bottom:none}
+.trace-ico{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.65rem}
+.trace-evt{font-weight:600;font-size:.74rem}
+.trace-det{font-size:.68rem;color:var(--gr);margin-top:1px}
+.trace-date{font-size:.63rem;color:var(--gr);white-space:nowrap;font-family:monospace;margin-left:auto;flex-shrink:0}
+
+/* Tabs */
+.tab-bar{display:flex;border-bottom:2px solid var(--grl);overflow-x:auto;background:#fff;flex-shrink:0}
+.tab-i{padding:7px 11px;font-size:.71rem;font-weight:700;color:var(--gr);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;white-space:nowrap;transition:.15s;flex-shrink:0}
+.tab-i.on{color:var(--or);border-bottom-color:var(--or)}
+.tab-content{flex:1;overflow-y:auto;padding:10px}
+.tab-pane{display:none}.tab-pane.on{display:block}
+
+/* Stat */
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.stat-box{background:var(--grll);border-radius:var(--r);padding:10px;text-align:center}
+.stat-n{font-size:1.35rem;font-weight:700;color:var(--bl)}
+.stat-l{font-size:.65rem;color:var(--gr)}
+
+/* Input file hidden */
+input[type=file]{display:none}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="topbar">
+    <div class="logo"><b>Generation</b>Standard</div>
+    <span id="top-badge" style="display:none" class="topbar-badge">!</span>
+  </div>
+
+  <!-- ── PAGE NOUVEAU ── -->
+  <div class="page on" id="pg-nouveau">
+    <div style="flex:1;overflow-y:auto;padding:10px">
+    <div class="card">
+      <div class="card-ttl">✏️ Nouveau document</div>
+      <div class="card-sub">Décrivez l'opération — l'IA génère le document en format PHAREC FI-00</div>
+
+      <div class="fr">
+        <label class="lbl">Type de document</label>
+        <div class="type-grid" id="type-grid">
+          <div class="type-card on" data-type="standard_qualite" onclick="selType(this)">
+            <span class="type-ico">📐</span>
+            <div><div class="type-name">Standard qualité</div>
+            <div class="type-desc">Critères, tolérances, valeurs de conformité — QUOI vérifier ?</div></div>
+          </div>
+          <div class="type-card" data-type="procedure_operatoire" onclick="selType(this)">
+            <span class="type-ico">📋</span>
+            <div><div class="type-name">Procédure opératoire</div>
+            <div class="type-desc">Étapes séquencées — COMMENT faire cette opération ?</div></div>
+          </div>
+          <div class="type-card" data-type="fiche_poste" onclick="selType(this)">
+            <span class="type-ico">🗂️</span>
+            <div><div class="type-name">Fiche de poste (FI-00)</div>
+            <div class="type-desc">Document complet avec étapes, critères et photos — affiché au poste.</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="f2">
+        <div class="fr"><label class="lbl">Poste</label><input class="inp" id="inp-poste" placeholder="ex: 7190"></div>
+        <div class="fr"><label class="lbl">Opérateur</label><input class="inp" id="inp-op" placeholder="Prénom Nom"></div>
+      </div>
+      <div class="fr">
+        <label class="lbl">Description de l'opération</label>
+        <textarea class="inp" id="inp-desc" rows="6" placeholder="Décrivez librement ce que vous faites. Ex : tarauder 4 points sur le caisson, souffler, graisser, mettre les bras en place selon flash XXXX..."></textarea>
+      </div>
+      <div class="fr">
+        <label class="lbl">Niveau de détail</label>
+        <div class="slider-wrap">
+          <div class="slider-labels"><span>Synthétique</span><span>Standard</span><span>Très détaillé</span></div>
+          <input type="range" id="detail-sl" min="1" max="5" value="3" oninput="updSl(this)">
+          <div class="slider-val" id="sl-lbl">Standard</div>
+        </div>
+      </div>
+      <button class="btn bp" onclick="doGen()">⚡ Générer le document</button>
+      <button class="btn bs" onclick="clearForm()">Effacer</button>
+    </div>
+    </div>
+  </div>
+
+  <!-- ── PAGE DOCUMENT (FI-00) ── -->
+  <div class="page" id="pg-doc">
+    <!-- Actions bar haut -->
+    <div class="fi-actions" id="fi-actions-top" style="border-top:none;border-bottom:1px solid var(--grl)">
+      <span class="fi-status" id="fi-status-top"></span>
+      <button class="btn bs bsm" onclick="saveDoc();toast('Enregistré ✓','ok')">💾 Enregistrer</button>
+      <button class="btn bp bsm" onclick="submitDoc()" id="btn-submit" style="display:none">→ Soumettre</button>
+      <button class="btn bv bsm" onclick="validerDoc()" id="btn-valider" style="display:none">✓ Valider</button>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tab-bar">
+      <div class="tab-i on" onclick="swTab(this,'tp-fi00')">📄 Document</div>
+      <div class="tab-i" onclick="swTab(this,'tp-infos')">ℹ️ Infos</div>
+      <div class="tab-i" onclick="swTab(this,'tp-ia')">🤖 IA</div>
+      <div class="tab-i" onclick="swTab(this,'tp-form')">🎓 Formations</div>
+      <div class="tab-i" onclick="swTab(this,'tp-export')">📤 Export</div>
+      <div class="tab-i" onclick="swTab(this,'tp-trace')">🕐 Historique</div>
+    </div>
+
+    <!-- Tab Document (FI-00) -->
+    <div class="tab-pane on" id="tp-fi00" style="padding:8px;overflow-y:auto;flex:1">
+      <div id="fi00-render"></div>
+      <button class="fi-add-row" onclick="addEtape()" style="margin-top:6px">+ Ajouter une étape</button>
+    </div>
+
+    <!-- Tab Infos -->
+    <div class="tab-pane" id="tp-infos">
+      <div style="padding:10px">
+        <div class="fr"><label class="lbl">Titre du document</label><input class="inp" id="ei-titre" oninput="S.cur.titre=this.value"></div>
+        <div class="f2">
+          <div class="fr"><label class="lbl">Référence</label><input class="inp" id="ei-ref" readonly style="background:var(--grll);opacity:.7"></div>
+          <div class="fr"><label class="lbl">Version</label><input class="inp" id="ei-ver" readonly style="background:var(--grll);opacity:.7"></div>
+        </div>
+        <div class="f2">
+          <div class="fr"><label class="lbl">Poste</label><input class="inp" id="ei-poste" oninput="S.cur._poste=this.value"></div>
+          <div class="fr"><label class="lbl">Opérateur</label><input class="inp" id="ei-op" oninput="S.cur._op=this.value"></div>
+        </div>
+        <div class="f2">
+          <div class="fr"><label class="lbl">Indice</label><input class="inp" id="ei-indice" placeholder="A" oninput="S.cur._indice=this.value"></div>
+          <div class="fr"><label class="lbl">Date</label><input class="inp" id="ei-date" type="date" oninput="S.cur._date=this.value"></div>
+        </div>
+        <div class="sep"></div>
+        <div class="fr"><label class="lbl">Tags</label>
+          <div id="ei-tags-wrap" style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px"></div>
+          <div style="display:flex;gap:6px">
+            <input class="inp" id="ei-tag-inp" placeholder="Nouveau tag…" onkeydown="if(event.key==='Enter')addTagCustom()" style="flex:1">
+            <button class="btn bp bsm" onclick="addTagCustom()">+</button>
+          </div>
+          <div class="tag-presets" id="ei-tag-presets"></div>
+        </div>
+        <div class="sep"></div>
+        <div class="fr"><label class="lbl">Lien événement qualité (8D, Kaizen, Audit)</label>
+          <input class="inp" id="ei-lien" placeholder="ex: 8D-2026-047" oninput="S.cur._lien=this.value">
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab IA -->
+    <div class="tab-pane" id="tp-ia">
+      <div style="padding:10px">
+        <div class="card-ttl" style="margin-bottom:4px">🤖 Modifier via IA</div>
+        <div class="card-sub">Donnez une instruction — l'IA modifie le document.</div>
+        <div id="chat-msgs" style="background:var(--grll);border-radius:8px;padding:8px;max-height:180px;overflow-y:auto;margin-bottom:8px;min-height:50px">
+          <div style="font-size:.72rem;color:var(--gr);text-align:center">Ex: "Ajoute un point critique BLOQUANT à l'étape 2"</div>
+        </div>
+        <div style="display:flex;gap:7px">
+          <input class="inp" id="chat-inp" placeholder="Votre instruction…" onkeydown="if(event.key==='Enter')sendChat()" style="flex:1;font-size:.8rem;padding:8px 10px">
+          <button class="btn bp bsm" onclick="sendChat()">→</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab Formations -->
+    <div class="tab-pane" id="tp-form">
+      <div style="padding:10px">
+        <div class="card-ttl" style="margin-bottom:2px">🎓 Registre de formation</div>
+        <div class="card-sub">ISO 9001 §7.2 — Qui a été formé sur ce standard ?</div>
+        <div id="form-list" style="margin-bottom:10px"></div>
+        <div class="sep"></div>
+        <div class="fr"><label class="lbl">Nom de l'opérateur</label><input class="inp" id="form-nom" placeholder="Prénom Nom"></div>
+        <div class="f2">
+          <div class="fr"><label class="lbl">Date</label><input class="inp" id="form-date" type="date"></div>
+          <div class="fr"><label class="lbl">Formateur</label><input class="inp" id="form-fmt" placeholder="Formateur"></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+          <input type="checkbox" id="form-sign" checked style="width:18px;height:18px;cursor:pointer">
+          <label for="form-sign" style="font-size:.79rem">Opérateur a signé</label>
+        </div>
+        <button class="btn bv" onclick="addFormation()">✅ Enregistrer</button>
+      </div>
+    </div>
+
+    <!-- Tab Export -->
+    <div class="tab-pane" id="tp-export">
+      <div style="padding:10px">
+        <div class="card-ttl" style="margin-bottom:8px">📤 Exporter</div>
+        <button class="btn bp" onclick="exportPDF()" style="margin-bottom:6px">📄 Télécharger FI-00 (impression)</button>
+        <button class="btn bb" onclick="exportDOC()" style="margin-bottom:6px">📝 Télécharger .doc (réécrivable)</button>
+        <button class="btn bs" onclick="exportFormPDF()" style="margin-bottom:10px">📋 Registre formation PDF</button>
+        <div class="sep"></div>
+        <div class="card-ttl" style="margin-bottom:6px">✉️ Envoyer par mail</div>
+        <div class="fr"><label class="lbl">Destinataire</label><input class="inp" id="mail-to" type="email"></div>
+        <div class="fr"><label class="lbl">CC</label><input class="inp" id="mail-cc" type="email"></div>
+        <div class="fr"><label class="lbl">Message</label><textarea class="inp" id="mail-msg" rows="2" placeholder="Commentaire…"></textarea></div>
+        <button class="btn bp" onclick="sendMail()">Envoyer</button>
+      </div>
+    </div>
+
+    <!-- Tab Historique -->
+    <div class="tab-pane" id="tp-trace">
+      <div style="padding:10px">
+        <div class="card-ttl" style="margin-bottom:8px">🕐 Historique de traçabilité</div>
+        <div id="trace-list"></div>
+      </div>
+    </div>
+
+    <!-- Input fichier caché -->
+    <input type="file" id="fi-input" accept="image/*">
+  </div>
+
+  <!-- ── PAGE BIBLIOTHÈQUE ── -->
+  <div class="page" id="pg-biblio">
+    <div class="bib-filters">
+      <input class="inp" id="bib-q" placeholder="🔍 Rechercher…" oninput="renderBiblio()" style="flex:1">
+      <select class="inp" id="bib-st" onchange="renderBiblio()" style="width:auto;font-size:.75rem">
+        <option value="">Tous</option>
+        <option value="BROUILLON">Brouillon</option>
+        <option value="EN ATTENTE">En attente</option>
+        <option value="VALIDÉ">Validé</option>
+        <option value="ARCHIVÉ">Archivé</option>
+      </select>
+    </div>
+    <div id="bib-list" style="flex:1;overflow-y:auto"></div>
+  </div>
+
+  <!-- ── PAGE PARAMÈTRES ── -->
+  <div class="page" id="pg-param">
+    <div style="flex:1;overflow-y:auto;padding:10px">
+    <div class="card">
+      <div class="card-ttl">⚙️ Paramètres</div>
+      <div class="fr"><label class="lbl">Unité / Atelier</label><input class="inp" id="p-unite" placeholder="Unité autonome 7180"></div>
+      <div class="fr"><label class="lbl">Entreprise</label><input class="inp" id="p-ent"></div>
+      <div class="fr"><label class="lbl">Email technicien méthodes</label><input class="inp" id="p-email" type="email"></div>
+      <div class="fr"><label class="lbl">Email CC</label><input class="inp" id="p-cc" type="email"></div>
+      <button class="btn bb" onclick="saveParams()">Sauvegarder</button>
+    </div>
+    <div class="card">
+      <div class="card-ttl">🔑 Clé API + Proxy</div>
+      <div class="card-sub">Saisissez votre clé Anthropic et l'URL de votre Cloudflare Worker.</div>
+      <div class="fr">
+        <label class="lbl">Clé API Anthropic (sk-ant-...)</label>
+        <div style="display:flex;gap:7px">
+          <input class="inp" id="p-key" type="password" placeholder="sk-ant-…" style="flex:1;font-family:monospace;font-size:.73rem">
+          <button class="btn bp bsm" onclick="saveKey()">OK</button>
+        </div>
+      </div>
+      <div class="fr">
+        <label class="lbl">URL Cloudflare Worker (proxy)</label>
+        <div style="display:flex;gap:7px">
+          <input class="inp" id="p-proxy" placeholder="https://gs-proxy.xxx.workers.dev" style="flex:1;font-size:.73rem">
+          <button class="btn bp bsm" onclick="saveProxy()">OK</button>
+        </div>
+        <div style="font-size:.67rem;color:var(--gr);margin-top:4px">
+          Requis pour fonctionner depuis GitHub Pages.<br>
+          Voir le fichier <b>worker.js</b> fourni pour l'installation (2 min).
+        </div>
+      </div>
+      <button class="btn bs bsm" onclick="resetKey()" style="margin-top:2px;width:auto">Réinitialiser clé</button>
+    </div>
+    <div class="card">
+      <div class="card-ttl">📊 Statistiques</div>
+      <div class="stat-grid">
+        <div class="stat-box"><div class="stat-n" id="st-tot">0</div><div class="stat-l">Documents</div></div>
+        <div class="stat-box"><div class="stat-n" style="color:var(--vt)" id="st-val">0</div><div class="stat-l">Validés</div></div>
+        <div class="stat-box"><div class="stat-n" style="color:var(--vi)" id="st-frm">0</div><div class="stat-l">Formations</div></div>
+        <div class="stat-box"><div class="stat-n" style="color:var(--or)" id="st-att">0</div><div class="stat-l">En attente</div></div>
+      </div>
+      <div style="margin-top:9px;padding:8px;background:var(--grll);border-radius:8px;font-size:.72rem;color:var(--gr)">
+        📷 Photos : <span id="st-ph-count">0</span> photo(s) —
+        <span id="st-ph-kb">0</span> Ko stockés
+        <span style="float:right;color:var(--gr)">(max ~5000 Ko)</span>
+      </div>
+    </div>
+    <div class="card" id="card-qr">
+      <div class="card-ttl">📱 QR Code — Accès mobile</div>
+      <div class="card-sub" id="qr-sub">Scannez pour ouvrir l'app directement sur votre téléphone.</div>
+      <div id="qr-container" style="display:flex;flex-direction:column;align-items:center;gap:10px;padding:6px 0">
+        <canvas id="qr-canvas" style="border-radius:8px;border:3px solid var(--bl);display:none"></canvas>
+        <div id="qr-url-display" style="font-size:.65rem;color:var(--gr);text-align:center;word-break:break-all;display:none"></div>
+        <div id="qr-placeholder" style="text-align:center;padding:14px 0">
+          <div style="font-size:2rem;margin-bottom:6px">🔗</div>
+          <div style="font-size:.78rem;color:var(--gr);line-height:1.5">
+            Saisissez votre URL GitHub Pages<br>pour générer le QR code.
+          </div>
+        </div>
+      </div>
+      <div class="fr">
+        <label class="lbl">URL de l'app (GitHub Pages)</label>
+        <div style="display:flex;gap:7px">
+          <input class="inp" id="qr-url-inp"
+            placeholder="https://[user].github.io/[repo]/generationstandard.html"
+            style="flex:1;font-size:.72rem"
+            oninput="onQrUrlChange(this.value)">
+          <button class="btn bp bsm" onclick="genQR()">QR</button>
+        </div>
+      </div>
+      <div id="qr-actions" style="display:none">
+        <button class="btn bb" onclick="downloadQR()" style="margin-top:4px">⬇️ Télécharger le QR code</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-ttl" style="color:var(--rg)">🗑 Données</div>
+      <button class="btn br" onclick="clearAll()">Effacer la bibliothèque</button>
+    </div>
+    </div>
+  </div>
+
+  <!-- NAV -->
+  <nav class="bnav">
+    <div class="ni on" id="nb-nouveau" onclick="goPage('nouveau')"><span class="ni-ico">✏️</span>NOUVEAU</div>
+    <div class="ni" id="nb-doc" onclick="goPage('doc')"><span class="ni-ico">📄</span>DOCUMENT</div>
+    <div class="ni" id="nb-biblio" onclick="goPage('biblio');renderBiblio()"><span class="ni-ico">📚</span>BIBLIO</div>
+    <div class="ni" id="nb-param" onclick="goPage('param');loadParams()"><span class="ni-ico">⚙️</span>PARAMS</div>
+  </nav>
+</div>
+<div class="tw" id="tw"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// CONSTANTES
+// ═══════════════════════════════════════════════════════
+const _dk = atob('c2stYW50LWFwaTAzLUZTbk5Nd2Z2LWZsS2FZMEJZb0ZxSFNSRDJrbEEtbkhObGxqNGhDRlFWZlBWUHJycTdTUVFyc0hMSnZRX2V6Q09ZX2tCMFh1Tk1zQVJfVDJycUpOTURRLWxFOWpLd0FBPw==').slice(0,-1);
+
+const TYPE_L = {
+  standard_qualite:'STANDARD QUALITÉ',
+  procedure_operatoire:'PROCÉDURE OPÉRATOIRE',
+  fiche_poste:'FICHE DE POSTE FI-00'
+};
+const TYPE_C = {
+  standard_qualite:'#1A2E4A',
+  procedure_operatoire:'#1A6D3A',
+  fiche_poste:'#E8711A'
+};
+const DETAIL_L = ['','Synthétique','Bref','Standard','Détaillé','Très détaillé'];
+const DETAIL_I = ['',
+  'Très court, 1 phrase max par étape, essentiel uniquement.',
+  'Bref, 2 phrases max par étape.',
+  'Standard, 2-3 phrases avec contexte.',
+  'Détaillé, expliquer le pourquoi.',
+  'Très complet avec toutes les précautions et vérifications.'
+];
+const TAG_PRESETS = [
+  {t:'sécurité',c:'#c0392b'},{t:'qualité',c:'#16693a'},{t:'5S',c:'#1A2E4A'},
+  {t:'montage',c:'#E8711A'},{t:'maintenance',c:'#5B2A8C'},{t:'formation',c:'#0369a1'},
+];
+const TRACE_ICO = {
+  CRÉATION:{i:'🆕',bg:'#EBF2FB'}, GÉNÉRATION_IA:{i:'🤖',bg:'#F3EEFF'},
+  VALIDATION:{i:'✅',bg:'#E9F7EF'}, SOUMISSION:{i:'📤',bg:'#FFF8E6'},
+  RENVOI:{i:'↩️',bg:'#FFF0F0'}, ARCHIVAGE:{i:'📦',bg:'#F4F4F2'},
+  FORMATION:{i:'🎓',bg:'#E9F7EF'}, TAG:{i:'🏷️',bg:'#F3EEFF'},
+  DUPLICATION:{i:'📋',bg:'#EBF2FB'}, MODIFICATION:{i:'✏️',bg:'#FFF8E6'},
+  ITÉRATION_IA:{i:'💬',bg:'#F3EEFF'}, EXPORT:{i:'📄',bg:'#F4F4F2'}
+};
+
+// ═══════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════
+var S = {
+  docs:   JSON.parse(localStorage.getItem('gs5_docs')  || '[]'),
+  cur:    null,
+  p:      JSON.parse(localStorage.getItem('gs5_params')|| '{}'),
+  ukey:   localStorage.getItem('gs5_ukey')  || '',
+  proxy:  localStorage.getItem('gs5_proxy') || '',
+  selType:'standard_qualite',
+  _phCb:  null,   // callback en attente pour photo
+};
+function sv() {
+  // Sauvegarder les métadonnées sans les photos (trop lourdes pour le JSON)
+  // Les photos sont stockées séparément sous gs5_ph_{id}_{type}
+  const docs_light = S.docs.map(d => {
+    const copy = JSON.parse(JSON.stringify(d)); // deep copy
+    // Stocker la photo produit séparément si c'est une vraie donnée (pas un placeholder)
+    if (copy.photo_produit && copy.photo_produit !== '__stored__') {
+      try {
+        localStorage.setItem('gs5_ph_'+d._id+'_p', copy.photo_produit);
+      } catch(e) {
+        if (e.name === 'QuotaExceededError' || e.code === 22) {
+          toast('Stockage plein — photo produit non sauvegardée. Supprimez des photos.', 'err');
+        }
+      }
+      copy.photo_produit = '__stored__';
+    } else if (!copy.photo_produit) {
+      copy.photo_produit = null; // pas de __stored__ si pas de photo
+    }
+    // Stocker les photos d'étapes séparément
+    if (copy.etapes) {
+      copy.etapes = copy.etapes.map((et, i) => {
+        const et2 = {...et};
+        if (et2.photo && et2.photo !== '__stored__') {
+          try {
+            localStorage.setItem('gs5_ph_'+d._id+'_e'+i, et2.photo);
+          } catch(e) {
+            if (e.name === 'QuotaExceededError' || e.code === 22) {
+              toast('Stockage plein — photo étape '+(i+1)+' non sauvegardée.', 'err');
+            }
+          }
+          et2.photo = '__stored__';
+        } else if (!et2.photo) {
+          et2.photo = null;
+        }
+        return et2;
+      });
+    }
+    return copy;
+  });
+  try {
+    localStorage.setItem('gs5_docs', JSON.stringify(docs_light));
+  } catch(e) {
+    if (e.name === 'QuotaExceededError' || e.code === 22) {
+      toast('Stockage saturé — impossible de sauvegarder. Supprimez des anciens documents.', 'err');
+    }
+  }
+}
+
+function loadPhotos(doc) {
+  // Restaurer les vraies photos depuis le stockage séparé dans l'objet doc
+  // IMPORTANT : modifie doc en place et le retourne — S.cur doit avoir les vraies photos en RAM
+  if (!doc) return doc;
+  if (doc.photo_produit === '__stored__') {
+    doc.photo_produit = localStorage.getItem('gs5_ph_'+doc._id+'_p') || null;
+  }
+  if (doc.etapes) {
+    doc.etapes.forEach((et, i) => {
+      if (et.photo === '__stored__') {
+        et.photo = localStorage.getItem('gs5_ph_'+doc._id+'_e'+i) || null;
+      }
+    });
+  }
+  return doc;
+}
+
+function getPhotoStats() {
+  // Calculer l'espace utilisé par les photos
+  let total = 0, count = 0;
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k && k.startsWith('gs5_ph_')) {
+      total += (localStorage.getItem(k)||'').length;
+      count++;
+    }
+  }
+  const kb = Math.round(total * 0.75 / 1024); // base64 → bytes approximatif
+  return {count, kb};
+}
+function saveDoc() {
+  if (!S.cur) return;
+  const i = S.docs.findIndex(d => d._id === S.cur._id);
+  if (i >= 0) S.docs[i] = S.cur;
+  else S.docs.unshift(S.cur);
+  sv(); updStats(); updNavBadge();
+}
+
+// ═══════════════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════════════
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function now()  { return new Date().toLocaleString('fr-FR'); }
+function nowDate() { return new Date().toISOString().slice(0,10); }
+function genRef(p) {
+  const d = new Date(), ym = String(d.getFullYear()).slice(2)+String(d.getMonth()+1).padStart(2,'0');
+  const n = S.docs.filter(x => x._poste === p).length + 1;
+  return 'STD-'+p+ym+'-'+String(n).padStart(3,'0');
+}
+function addTrace(doc, type, detail='', acteur='Opérateur') {
+  doc._trace = doc._trace || [];
+  doc._trace.unshift({type, detail, acteur, date: now()});
+}
+function parseJ(raw) {
+  if (!raw || typeof raw !== 'string') return null;
+  try {
+    const fence = '`';
+    let s = raw.split(fence+fence+fence+'json').join('').split(fence+fence+fence).join('').trim();
+    const a = s.indexOf('{');
+    if (a < 0) return null;
+    const b = s.lastIndexOf('}');
+    let candidate;
+    if (b > a) {
+      candidate = s.slice(a, b+1);
+    } else {
+      candidate = repairJSON(s.slice(a));
+      if (!candidate) return null;
+    }
+    try { return JSON.parse(candidate); } catch(e1) {}
+    const cleaned = candidate
+      .replace(/[\x00-\x08\x0b\x0c\x0e-\x1f]/g,'')
+      .replace(/,\s*([}\]])/g,'$1');
+    try { return JSON.parse(cleaned); } catch(e2) {}
+    try { return JSON.parse(repairJSON(cleaned)||''); } catch(e3) {}
+    return null;
+  } catch { return null; }
+}
+function repairJSON(s) {
+  if (!s) return null;
+  let t = s
+    .replace(/,?\s*"[^"]*"\s*:\s*$/,'')
+    .replace(/,?\s*"[^"]*"\s*:\s*"[^"]*$/,'')
+    .replace(/,?\s*"[^"]*"\s*:\s*\[[^\]]*$/,'')
+    .replace(/,\s*$/,'');
+  let depth=0, inStr=false, esc2=false, types=[];
+  for (let i=0; i<t.length; i++) {
+    const c=t[i];
+    if (esc2) { esc2=false; continue; }
+    if (c==='\\' && inStr) { esc2=true; continue; }
+    if (c==='"') { inStr=!inStr; continue; }
+    if (inStr) continue;
+    if (c==='{') { depth++; types.push('}'); }
+    else if (c==='[') { depth++; types.push(']'); }
+    else if ((c==='}'||c===']') && depth>0) { depth--; types.pop(); }
+  }
+  if (inStr) t+='"';
+  return t + types.reverse().join('');
+}
+function toast(m,t='info') {
+  const w=document.getElementById('tw'), el=document.createElement('div');
+  el.className='tst '+t; el.textContent=m; w.appendChild(el);
+  setTimeout(()=>el.remove(), 3000);
+}
+
+// ═══════════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════════
+function goPage(n) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('on'));
+  document.querySelectorAll('.ni').forEach(x => x.classList.remove('on'));
+  document.getElementById('pg-'+n).classList.add('on');
+  document.getElementById('nb-'+n).classList.add('on');
+}
+function swTab(el, id) {
+  document.querySelectorAll('.tab-bar .tab-i').forEach(t => t.classList.remove('on'));
+  el.classList.add('on');
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('on'));
+  const pane = document.getElementById(id);
+  if (pane) pane.classList.add('on');
+  // Rafraîchir contenu des tabs dynamiques
+  if (id==='tp-form') renderFormList();
+  if (id==='tp-trace') renderTrace();
+  if (id==='tp-infos') loadInfos();
+  if (id==='tp-export') loadExport();
+}
+
+// ═══════════════════════════════════════════════════════
+// FORMULAIRE NOUVEAU
+// ═══════════════════════════════════════════════════════
+function selType(el) {
+  document.querySelectorAll('.type-card').forEach(c => c.classList.remove('on'));
+  el.classList.add('on');
+  S.selType = el.dataset.type;
+}
+function updSl(el) {
+  const v = parseInt(el.value);
+  el.style.background = `linear-gradient(to right,var(--or) ${(v-1)/4*100}%,var(--grl) ${(v-1)/4*100}%)`;
+  document.getElementById('sl-lbl').textContent = DETAIL_L[v];
+}
+function clearForm() {
+  ['inp-poste','inp-op','inp-desc'].forEach(id => { const e=document.getElementById(id); if(e)e.value=''; });
+}
+
+// ═══════════════════════════════════════════════════════
+// GÉNÉRATION IA
+// ═══════════════════════════════════════════════════════
+async function callAI(prompt, sys='') {
+  const body = {
+    model:'claude-haiku-4-5',
+    max_tokens:4000,
+    messages:[{role:'user', content: prompt}]
+  };
+  if (sys) body.system = sys;
+
+  const proxyUrl = S.proxy || localStorage.getItem('gs5_proxy') || '';
+  const apiKey   = S.ukey  || localStorage.getItem('gs5_ukey')  || '';
+
+  let r;
+  if (proxyUrl) {
+    // Appel via le Worker Cloudflare (résout le CORS)
+    r = await fetch(proxyUrl, {
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'X-API-Key': apiKey,
+      },
+      body: JSON.stringify(body)
+    });
+  } else {
+    // Appel direct (fonctionne en localhost, pas depuis GitHub Pages)
+    r = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version':'2023-06-01',
+        'anthropic-dangerous-direct-browser-calls':'true'
+      },
+      body: JSON.stringify(body)
+    });
+  }
+
+  if (!r.ok) {
+    const e = await r.json().catch(()=>({}));
+    const msg = e.error?.message || ('Erreur API '+r.status);
+    if (r.status === 401) throw new Error('Clé API invalide — vérifiez votre clé dans Paramètres');
+    if (r.status === 403) throw new Error('Accès refusé — vérifiez votre clé API dans Paramètres');
+    if (r.status === 429) throw new Error('Trop de requêtes — attendez quelques secondes');
+    if (r.status === 500) throw new Error('Erreur serveur — réessayez dans quelques instants');
+    throw new Error(msg);
+  }
+  const d = await r.json();
+  return d.content?.[0]?.text || '';
+}
+
+async function doGen() {
+  const poste  = document.getElementById('inp-poste').value.trim();
+  const op     = document.getElementById('inp-op').value.trim();
+  const desc   = document.getElementById('inp-desc').value.trim();
+  const detail = parseInt(document.getElementById('detail-sl').value);
+  if (!poste||!op||!desc) { toast('Remplissez tous les champs','err'); return; }
+
+  const ref = genRef(poste);
+
+  // Afficher loader
+  goPage('doc');
+  const fi00Render = document.getElementById('fi00-render');
+  const addRowBtn = document.querySelector('.fi-add-row');
+  if (fi00Render) fi00Render.innerHTML = '<div class="ldr"><div class="sp"></div><div class="ldm">Génération en cours…<br><small>'+DETAIL_L[detail]+' — '+TYPE_L[S.selType]+'</small></div></div>';
+  if (addRowBtn) addRowBtn.style.display='none';
+  const fiActTop = document.getElementById('fi-actions-top');
+  if (fiActTop) fiActTop.style.display='none';
+
+  const typeLabel = {
+    standard_qualite:'Standard qualité — définir des critères QUOI vérifier',
+    procedure_operatoire:'Procédure opératoire — décrire des étapes COMMENT faire',
+    fiche_poste:'Fiche de poste FI-00 — étapes + critères + points clés'
+  }[S.selType];
+
+  const prompt =
+`Tu es un expert en méthodes industrielles. Génère un document qualité JSON.
+
+TYPE: ${typeLabel}
+REFERENCE: ${ref}
+POSTE: ${poste}
+OPERATEUR: ${op}
+DESCRIPTION: ${desc}
+NIVEAU: ${DETAIL_I[detail]}
+
+Réponds UNIQUEMENT avec le JSON brut, sans markdown, sans texte avant ou après.
+
+{
+  "type": "${S.selType}",
+  "titre": "titre court et précis de l'opération",
+  "description_courte": "résumé en 1 phrase",
+  "outillage": ["outil1", "outil2"],
+  "epi": {"chaussures": true, "auditives": false, "gants": true, "chimique": false},
+  "temps": [{"option": "Standard", "temps": "XX min"}],
+  "plans": [{"designation": "nom du plan", "reference": "REF-XXX"}],
+  "etapes": [
+    {
+      "numero": 1,
+      "titre": "Action courte à l'infinitif",
+      "description": "Description détaillée de l'action",
+      "pt_cle": "S",
+      "points_cles": "Point clé ou critère à vérifier",
+      "photo": null
+    }
+  ],
+  "points_critiques_globaux": [
+    {"niveau": "BLOQUANT", "texte": "point critique important"}
+  ],
+  "tolerances": [],
+  "cas_particuliers": []
+}
+
+Règles: pt_cle = S (sécurité) Q (qualité) T (technique) ou vide. Verbes à l'infinitif. Français industriel. [] si info manquante.`;
+
+  try {
+    const raw = await callAI(prompt);
+    const data = parseJ(raw);
+    if (!data) {
+      console.error('Réponse brute:', raw);
+      throw new Error('Réponse invalide — ' + (raw?raw.slice(0,120):'vide'));
+    }
+
+    // Construire le document
+    const doc = {
+      ...data,
+      _id:      Date.now(),
+      _ref:     ref,
+      _poste:   poste,
+      _op:      op,
+      _statut:  'BROUILLON',
+      _version: 'v1',
+      _indice:  'A',
+      _date:    nowDate(),
+      _msgs:    [],
+      _trace:   [],
+      _tags:    [],
+      _formations: [],
+      _lien:    '',
+    };
+    addTrace(doc, 'CRÉATION', `Généré par IA — ${DETAIL_L[detail]} — poste ${poste}`, op);
+    addTrace(doc, 'GÉNÉRATION_IA', `claude-haiku-4-5 — niveau ${detail}/5 — ${(doc.etapes||[]).length} étapes`, 'Système');
+
+    S.cur = doc;
+    S.docs.unshift(doc);
+    loadPhotos(doc);
+    sv(); updStats(); updNavBadge();
+
+    const _fat=document.getElementById('fi-actions-top');
+    if(_fat)_fat.style.display='';
+    if(addRowBtn)addRowBtn.style.display='';
+    // Forcer le retour sur l'onglet Document
+    document.querySelectorAll('.tab-bar .tab-i').forEach((t,i) => t.classList.toggle('on', i===0));
+    document.querySelectorAll('.tab-pane').forEach((p,i) => p.classList.toggle('on', i===0));
+    renderFI00(doc);
+    updDocActions();
+    toast('Document généré !', 'ok');
+  } catch(e) {
+    const isFetch = !e.message || e.message === 'Failed to fetch' || e.message.includes('fetch') || e.message.includes('network');
+    const errMsg = isFetch
+      ? 'Impossible de contacter l\'API Anthropic.'
+      : e.message;
+    const conseil = isFetch
+      ? '<b>Cause probable : clé API manquante.</b><br>1. Allez dans Paramètres<br>2. Saisissez votre clé API Anthropic (sk-ant-...)<br>3. Revenez et réessayez'
+      : 'Vérifiez la clé API dans Paramètres ou réessayez avec une description plus simple.';
+    if(fi00Render) fi00Render.innerHTML =
+      '<div style="padding:14px">'
+      + '<div style="color:var(--rg);font-weight:700;margin-bottom:8px">Erreur de génération</div>'
+      + '<div style="font-size:.8rem;color:var(--tx2);margin-bottom:10px">' + esc(errMsg) + '</div>'
+      + '<div style="font-size:.75rem;color:var(--tx2);background:var(--grll);padding:10px;border-radius:8px;margin-bottom:12px;line-height:1.6">' + conseil + '</div>'
+      + '<button class="btn bp" onclick="goPage(\'param\');loadParams()" style="margin-bottom:7px">⚙️ Ouvrir Paramètres</button>'
+      + '<button class="btn bs" onclick="goPage(\'nouveau\')">← Retour</button>'
+      + '</div>';
+    const _fat2=document.getElementById('fi-actions-top');
+    if(_fat2)_fat2.style.display='';
+    if(addRowBtn)addRowBtn.style.display='';
+    toast('Erreur', 'err');
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// RENDU FI-00 PHAREC
+// ═══════════════════════════════════════════════════════
+function renderFI00(doc) {
+  if (!doc) return;
+  const etapes = doc.etapes || [];
+  const temps  = doc.temps  || [];
+  const plans  = doc.plans  || [];
+  const epi    = doc.epi    || {};
+  const c1     = TYPE_C[doc.type] || '#E8711A';
+
+  // EPI texte
+  const epiItems = [];
+  if (epi.chaussures) epiItems.push('👟 Chaussures sécu');
+  if (epi.auditives)  epiItems.push('🔇 Protections auditives');
+  if (epi.gants)      epiItems.push('🧤 Gants');
+  if (epi.chimique)   epiItems.push('⚠️ Fiche sécurité chimique');
+
+  let html = `
+<!-- EN-TÊTE ORANGE -->
+<div class="fi-hdr" style="border:2px solid ${c1};border-radius:8px 8px 0 0">
+  <div class="fi-hdr-r1">
+    <div class="fi-hdr-title" style="background:${c1}" contenteditable="true" onblur="S.cur.titre=this.textContent;saveDoc()">${esc(doc.titre||'Titre du document')}</div>
+    <div class="fi-hdr-ref" style="background:${c1}">${esc(doc._ref)}</div>
+  </div>
+  <div class="fi-hdr-r2" style="background:${c1}dd" contenteditable="true" onblur="S.cur.description_courte=this.textContent;saveDoc()">${esc(doc.description_courte||'Description courte')}</div>
+  <div class="fi-hdr-r3" style="background:${c1}bb">
+    <div class="fi-hdr-cell" contenteditable="true" onblur="S.cur._indice=this.textContent;saveDoc()" title="Indice de révision">${esc(doc._indice||'A')}</div>
+    <div class="fi-hdr-cell" contenteditable="true" onblur="S.cur._date=this.textContent;saveDoc()" title="Date">${esc(doc._date||'')}</div>
+    <div class="fi-hdr-cell" contenteditable="true" onblur="S.cur._op=this.textContent;saveDoc()" title="Rédigé par">${esc(doc._op||'')}</div>
+  </div>
+</div>
+
+<!-- ZONE MILIEU : PHOTO + TEMPS + PLANS -->
+<div class="fi-mid" style="border-color:${c1}55;border-width:0 2px">
+  <div class="fi-photo-zone" onclick="pickPhoto('produit')" id="fi-photo-produit">
+    ${doc.photo_produit
+      ? `<img src="${doc.photo_produit}" alt="Produit">`
+      : `<div class="fi-photo-placeholder"><span>📷</span>Photo produit assemblé<br><small style="opacity:.6">Appuyer pour ajouter</small></div>`}
+  </div>
+  <div class="fi-right" style="border-left:1px solid #ddd">
+    <div class="fi-sect-title" style="color:${c1}">TEMPS ALLOUÉ</div>
+    <div class="fi-row-hdr"><div>Option</div><div>Temps</div></div>
+    ${[0,1].map(i => `<div class="fi-row">
+      <div contenteditable="true" data-ph="—" onblur="setTemps(${i},'option',this.textContent)">${esc((temps[i]||{}).option||'')}</div>
+      <div contenteditable="true" data-ph="—" onblur="setTemps(${i},'temps',this.textContent)">${esc((temps[i]||{}).temps||'')}</div>
+    </div>`).join('')}
+    <div class="fi-sect-title" style="color:${c1}">PLANS</div>
+    <div class="fi-row-hdr"><div>Désignation</div><div>Référence</div></div>
+    ${[0,1].map(i => `<div class="fi-row">
+      <div contenteditable="true" data-ph="—" onblur="setPlan(${i},'designation',this.textContent)">${esc((plans[i]||{}).designation||'')}</div>
+      <div contenteditable="true" data-ph="—" onblur="setPlan(${i},'reference',this.textContent)">${esc((plans[i]||{}).reference||'')}</div>
+    </div>`).join('')}
+  </div>
+</div>
+
+<!-- EPI -->
+<div class="fi-epi" style="border-color:${c1}55;border-width:0 2px 1px">
+  ${epiItems.length ? epiItems.map(e=>`<span class="fi-epi-badge">${e}</span>`).join('') : '<span style="color:var(--gr);font-size:.63rem">Aucun EPI défini — modifier dans Infos</span>'}
+</div>
+
+<!-- TABLEAU PHAREC -->
+<table class="fi-tab" style="border-color:${c1}55">
+  <thead>
+    <tr class="fi-tab-hdr">
+      <th style="width:7%">N°</th>
+      <th style="width:37%">DESCRIPTION DES OPÉRATIONS</th>
+      <th style="width:8%">Pt clé</th>
+      <th style="width:48%">Points Clés / Photos</th>
+    </tr>
+    <tr class="fi-tab-sub">
+      <th></th><th></th><th></th>
+      <th>
+        <div style="display:flex">
+          <span class="sub-s" style="flex:1;padding:2px 4px">+ sécurité</span>
+          <span class="sub-q" style="flex:1;padding:2px 4px">◆ qualité</span>
+          <span class="sub-t" style="flex:1;padding:2px 4px">■ technique</span>
+        </div>
+      </th>
+    </tr>
+  </thead>
+  <tbody id="fi-tbody">
+${etapes.map((e,i) => renderEtapeRow(e,i)).join('')}
+  </tbody>
+</table>`;
+
+  const _r=document.getElementById('fi00-render');
+  if(_r)_r.innerHTML=html;
+}
+
+function renderEtapeRow(e, i) {
+  const ptcle = e.pt_cle||'';
+  const ptColor = ptcle==='S'?'var(--rg)':ptcle==='Q'?'var(--vt)':ptcle==='T'?'#1a2e99':'var(--gr)';
+  const ptLabel = ptcle==='S'?'+ S':ptcle==='Q'?'◆ Q':ptcle==='T'?'■ T':'';
+  return `<tr data-idx="${i}">
+  <td class="td-num">
+    <div class="td-num-wrap">
+      <button class="del-row-btn" onclick="delEtape(${i})" title="Supprimer">✕</button>
+      ${e.numero||i+1}
+    </div>
+  </td>
+  <td class="td-desc">
+    <div class="cell-edit" contenteditable="true" data-ph="Description de l'étape…"
+      onblur="setEtapeField(${i},'description',this.textContent)">${esc(e.description||e.titre||'')}</div>
+  </td>
+  <td class="td-ptcle">
+    <select class="ptcle-sel" style="color:${ptColor}" onchange="setEtapeField(${i},'pt_cle',this.value)">
+      <option value="" ${!ptcle?'selected':''}>—</option>
+      <option value="S" ${ptcle==='S'?'selected':''} style="color:var(--rg)">+ S</option>
+      <option value="Q" ${ptcle==='Q'?'selected':''} style="color:var(--vt)">◆ Q</option>
+      <option value="T" ${ptcle==='T'?'selected':''} style="color:#1a2e99">■ T</option>
+    </select>
+  </td>
+  <td class="td-pk">
+    <div class="cell-edit" contenteditable="true" data-ph="Point clé ou critère…"
+      onblur="setEtapeField(${i},'points_cles',this.textContent)"
+      style="min-height:30px">${esc(e.points_cles||'')}</div>
+    <div class="cell-photo" onclick="pickPhoto('etape',${i})" id="fi-ph-${i}">
+      ${e.photo
+        ? `<img src="${e.photo}" alt=""><button class="cell-photo-del" onclick="event.stopPropagation();delPhotoEtape(${i})">✕</button>`
+        : `<div class="cell-photo-ph"><span>📷</span>Ajouter photo</div>`}
+    </div>
+  </td>
+</tr>`;
+}
+
+// Rafraîchir le tbody seulement (pas toute la table)
+function refreshTbody() {
+  const doc = S.cur; if (!doc) return;
+  const tbody = document.getElementById('fi-tbody'); if (!tbody) return;
+  tbody.innerHTML = (doc.etapes||[]).map((e,i) => renderEtapeRow(e,i)).join('');
+}
+
+// ═══════════════════════════════════════════════════════
+// ÉDITION INLINE
+// ═══════════════════════════════════════════════════════
+function setEtapeField(i, field, val) {
+  if (!S.cur||!S.cur.etapes) return;
+  if (!S.cur.etapes[i]) return; // index hors limites
+  S.cur.etapes[i][field] = (val||'').trim();
+  addTrace(S.cur, 'MODIFICATION', 'Étape '+(i+1)+' — '+field, 'Opérateur');
+  saveDoc();
+}
+function setTemps(i, field, val) {
+  if (!S.cur) return;
+  S.cur.temps = S.cur.temps || [];
+  while (S.cur.temps.length <= i) S.cur.temps.push({});
+  S.cur.temps[i] = S.cur.temps[i] || {};
+  S.cur.temps[i][field] = (val||'').trim();
+  saveDoc();
+}
+function setPlan(i, field, val) {
+  if (!S.cur) return;
+  S.cur.plans = S.cur.plans || [];
+  while (S.cur.plans.length <= i) S.cur.plans.push({});
+  S.cur.plans[i] = S.cur.plans[i] || {};
+  S.cur.plans[i][field] = (val||'').trim();
+  saveDoc();
+}
+function addEtape() {
+  if (!S.cur) return;
+  S.cur.etapes = S.cur.etapes || [];
+  const n = S.cur.etapes.length + 1;
+  S.cur.etapes.push({numero:n, titre:'', description:'', pt_cle:'', points_cles:'', photo:null});
+  addTrace(S.cur, 'MODIFICATION', `Étape ${n} ajoutée`, 'Opérateur');
+  saveDoc(); refreshTbody();
+  toast('Étape ajoutée', 'ok');
+}
+function delEtape(i) {
+  if (!S.cur) return;
+  if (typeof confirm !== 'undefined' && !confirm('Supprimer cette étape ?')) return;
+  S.cur.etapes.splice(i, 1);
+  // Renuméroter
+  S.cur.etapes.forEach((e,j) => { e.numero = j+1; });
+  addTrace(S.cur, 'MODIFICATION', `Étape ${i+1} supprimée`, 'Opérateur');
+  saveDoc(); refreshTbody();
+}
+
+// ═══════════════════════════════════════════════════════
+// PHOTOS — clic sur zone → sélecteur de fichier
+// ═══════════════════════════════════════════════════════
+function pickPhoto(type, idx) {
+  S._phCb = {type, idx};
+  const inp = document.getElementById('fi-input');
+  inp.onchange = handlePhotoInput;
+  inp.value = '';
+  inp.click();
+}
+function handlePhotoInput(e) {
+  const file = e.target.files[0];
+  if (!file || !S.cur) return;
+  const r = new FileReader();
+  r.onload = ev => {
+    // Compresser via canvas avant stockage
+    compressPhoto(ev.target.result, 800, 0.75, function(src) {
+      const {type, idx} = S._phCb;
+      if (type === 'produit') {
+        S.cur.photo_produit = src;
+        const zone = document.getElementById('fi-photo-produit');
+        if (zone) zone.innerHTML = '<img src="'+src+'" alt="Produit">';
+      } else if (type === 'etape') {
+        S.cur.etapes[idx].photo = src;
+        const cell = document.getElementById('fi-ph-'+idx);
+        if (cell) cell.innerHTML = '<img src="'+src+'" alt=""><button class="cell-photo-del" onclick="event.stopPropagation();delPhotoEtape('+idx+')">✕</button>';
+      }
+      addTrace(S.cur, 'MODIFICATION', 'Photo ajoutée — '+(type==='produit'?'produit':'étape '+(idx+1)), 'Opérateur');
+      saveDoc();
+      toast('Photo ajoutée ✓', 'ok');
+    });
+  };
+  r.readAsDataURL(file);
+}
+
+function compressPhoto(dataUrl, maxW, quality, cb) {
+  const img = new Image();
+  img.onload = function() {
+    const canvas = document.createElement('canvas');
+    let w = img.width, h = img.height;
+    if (w > maxW) { h = Math.round(h * maxW / w); w = maxW; }
+    canvas.width = w; canvas.height = h;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0, w, h);
+    cb(canvas.toDataURL('image/jpeg', quality));
+  };
+  img.onerror = function() { cb(dataUrl); }; // fallback sans compression
+  img.src = dataUrl;
+}
+function delPhotoEtape(i) {
+  if (!S.cur) return;
+  if (!S.cur.etapes || !S.cur.etapes[i]) return; // index hors limites
+  S.cur.etapes[i].photo = null;
+  const cell = document.getElementById('fi-ph-'+i);
+  if (cell) cell.innerHTML = '<div class="cell-photo-ph"><span>📷</span>Ajouter photo</div>';
+  saveDoc();
+}
+
+// ═══════════════════════════════════════════════════════
+// WORKFLOW
+// ═══════════════════════════════════════════════════════
+function updDocActions() {
+  const doc = S.cur;
+  if (!doc) return;
+  const st = doc._statut;
+  const btnSub = document.getElementById('btn-submit');
+  const btnVal = document.getElementById('btn-valider');
+  const stEl   = document.getElementById('fi-status-top');
+  if (stEl) stEl.innerHTML = `<span class="bdg ${statBdg(st)}">${st}</span>`;
+  if (btnSub) btnSub.style.display = st==='BROUILLON'?'':'none';
+  if (btnVal) btnVal.style.display = st==='EN ATTENTE'?'':'none';
+}
+function submitDoc() {
+  if (!S.cur) return;
+  S.cur._statut = 'EN ATTENTE';
+  addTrace(S.cur, 'SOUMISSION', 'Soumis pour validation', S.cur._op);
+  saveDoc(); updDocActions(); updNavBadge();
+  // Notif mail auto
+  if (S.p.email) sendMailAuto();
+  toast('Soumis pour validation', 'ok');
+}
+function validerDoc() {
+  if (!S.cur) return;
+  S.cur._statut = 'VALIDÉ';
+  addTrace(S.cur, 'VALIDATION', 'Validé et publié', 'Tech. Méthodes');
+  saveDoc(); updDocActions(); updNavBadge();
+  toast('Validé ✓', 'ok');
+}
+function renvoyerDoc() {
+  if (!S.cur) return;
+  const motif = prompt('Motif de renvoi en brouillon (obligatoire) :');
+  if (!motif || !motif.trim()) return;
+  S.cur._statut = 'BROUILLON';
+  addTrace(S.cur, 'RENVOI', 'Renvoyé — ' + motif.trim(), 'Tech. Méthodes');
+  saveDoc(); updDocActions(); updNavBadge();
+  toast('Renvoyé en brouillon', 'info');
+}
+function statBdg(s) {
+  const m = {
+    'BROUILLON':'bd-brouillon','EN ATTENTE':'bd-attente',
+    'VALIDÉ':'bd-valide','VALIDE':'bd-valide',
+    'ARCHIVÉ':'bd-archive','ARCHIVE':'bd-archive',
+    'À METTRE À JOUR':'bd-majour'
+  };
+  return m[s]||'bd-brouillon';
+}
+
+// ═══════════════════════════════════════════════════════
+// ONGLET INFOS
+// ═══════════════════════════════════════════════════════
+function loadInfos() {
+  const doc = S.cur; if (!doc) return;
+  const set = (id,v) => { const e=document.getElementById(id); if(e)e.value=v||''; };
+  set('ei-titre', doc.titre);
+  set('ei-ref',   doc._ref);
+  set('ei-ver',   doc._version);
+  set('ei-poste', doc._poste);
+  set('ei-op',    doc._op);
+  set('ei-indice',doc._indice||'A');
+  set('ei-date',  doc._date);
+  set('ei-lien',  doc._lien||'');
+  renderTagsUI();
+}
+function loadExport() {
+  const set = (id,v) => { const e=document.getElementById(id); if(e)e.value=v||''; };
+  set('mail-to', S.p.email);
+  set('mail-cc', S.p.cc);
+}
+
+// ═══════════════════════════════════════════════════════
+// TAGS
+// ═══════════════════════════════════════════════════════
+function renderTagsUI() {
+  const doc = S.cur; if (!doc) return;
+  const wrap = document.getElementById('ei-tags-wrap');
+  if (!wrap) return;
+  doc._tags = doc._tags || [];
+  wrap.innerHTML = doc._tags.map(t =>
+    `<span class="tag" style="background:${t.c}22;color:${t.c};border:1px solid ${t.c}55">
+      ${esc(t.t)}<button class="tag-del" onclick="removeTag('${esc(t.t)}')">✕</button>
+    </span>`).join('');
+  // Presets
+  const pp = document.getElementById('ei-tag-presets');
+  if (pp) pp.innerHTML = TAG_PRESETS.map(tp =>
+    `<span class="tag-preset" style="color:${tp.c};border-color:${tp.c}" onclick="addTagPreset('${esc(tp.t)}','${tp.c}')">${esc(tp.t)}</span>`
+  ).join('');
+}
+function addTagPreset(t, c) {
+  if (!S.cur) return;
+  S.cur._tags = S.cur._tags || [];
+  if (S.cur._tags.find(x => x.t===t)) { toast('Tag déjà présent','info'); return; }
+  S.cur._tags.push({t,c});
+  addTrace(S.cur,'TAG',`"${t}" ajouté`,'Utilisateur');
+  saveDoc(); renderTagsUI();
+}
+function addTagCustom() {
+  const inp = document.getElementById('ei-tag-inp');
+  const t = inp?.value.trim().toLowerCase().replace(/\s+/g,'-').slice(0,30);
+  if (!t) return;
+  inp.value = '';
+  addTagPreset(t, '#5B2A8C');
+}
+function removeTag(t) {
+  if (!S.cur) return;
+  S.cur._tags = S.cur._tags.filter(x => x.t!==t);
+  saveDoc(); renderTagsUI();
+}
+
+// ═══════════════════════════════════════════════════════
+// FORMATIONS
+// ═══════════════════════════════════════════════════════
+function renderFormList() {
+  const doc = S.cur; if (!doc) return;
+  const list = document.getElementById('form-list'); if (!list) return;
+  const forms = doc._formations || [];
+  if (!forms.length) {
+    list.innerHTML = '<div style="font-size:.78rem;color:var(--gr);padding:6px 0">Aucune formation enregistrée.</div>';
+    return;
+  }
+  list.innerHTML = forms.map(f =>
+    `<div class="form-item">
+      <div class="form-nom">${esc(f.nom)} ${f.signe?'✅':''}</div>
+      <div class="form-meta">Formé le ${esc(f.date)} — v${esc(f.version)} — par ${esc(f.formateur)}</div>
+    </div>`
+  ).join('');
+  // Pré-remplir le formateur
+  const fmt = document.getElementById('form-fmt');
+  if (fmt && !fmt.value && S.p.email) fmt.value = S.p.email.split('@')[0];
+  const fd = document.getElementById('form-date');
+  if (fd && !fd.value) fd.value = nowDate();
+}
+function addFormation() {
+  if (!S.cur) return;
+  const nom = document.getElementById('form-nom')?.value.trim();
+  if (!nom) { toast('Saisissez un nom','err'); return; }
+  const date    = document.getElementById('form-date')?.value || nowDate();
+  const fmt     = document.getElementById('form-fmt')?.value.trim() || '—';
+  const signe   = document.getElementById('form-sign')?.checked || false;
+  S.cur._formations = S.cur._formations || [];
+  S.cur._formations.push({nom, date, formateur:fmt, version:S.cur._version||'v1', signe});
+  addTrace(S.cur,'FORMATION',`${nom} formé sur ${S.cur._version||'v1'} par ${fmt}`, fmt);
+  document.getElementById('form-nom').value = '';
+  saveDoc(); renderFormList(); updStats();
+  toast(`Formation de ${nom} enregistrée ✓`, 'ok');
+}
+
+// ═══════════════════════════════════════════════════════
+// HISTORIQUE
+// ═══════════════════════════════════════════════════════
+function renderTrace() {
+  const doc = S.cur; if (!doc) return;
+  const list = document.getElementById('trace-list'); if (!list) return;
+  const trace = doc._trace || [];
+  if (!trace.length) { list.innerHTML='<div style="font-size:.78rem;color:var(--gr)">Aucun événement.</div>'; return; }
+  list.innerHTML = trace.map(e => {
+    const ic = TRACE_ICO[e.type] || {i:'●',bg:'#F4F4F2'};
+    return `<div class="trace-item">
+      <div class="trace-ico" style="background:${ic.bg}">${ic.i}</div>
+      <div style="flex:1">
+        <div class="trace-evt">${e.type}${e.detail?' — <span style="font-weight:400;color:var(--tx2)">'+esc(e.detail)+'</span>':''}</div>
+        <div class="trace-det">${esc(e.acteur)}</div>
+      </div>
+      <div class="trace-date">${esc(e.date)}</div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════
+// CHAT IA
+// ═══════════════════════════════════════════════════════
+async function sendChat() {
+  const inp = document.getElementById('chat-inp');
+  const msg = inp?.value.trim();
+  if (!msg||!S.cur) return;
+  inp.value = '';
+  const cm = document.getElementById('chat-msgs');
+  if (cm) {
+    cm.innerHTML += `<div class="msg u" style="background:var(--bl);color:#fff;padding:6px 9px;border-radius:8px;margin-bottom:5px;font-size:.76rem">${esc(msg)}</div>
+      <div class="msg a" id="cht" style="background:#fff;border:1px solid var(--grl);padding:6px 9px;border-radius:8px;margin-bottom:5px;font-size:.76rem"><div class="sp" style="width:12px;height:12px;border-width:2px"></div></div>`;
+    cm.scrollTop = cm.scrollHeight;
+  }
+  try {
+    const raw = await callAI(
+      `Modifie ce document qualité JSON selon l'instruction.\nDocument actuel:\n${JSON.stringify(S.cur)}\n\nInstruction: ${msg}\n\nRetourne UNIQUEMENT le JSON complet modifié. Conserve tous les champs commençant par _ sans les modifier.`
+    );
+    const upd = parseJ(raw);
+    if (!upd) throw new Error('Réponse invalide');
+    // Conserver les métadonnées
+    ['_id','_ref','_poste','_op','_statut','_version','_indice','_date','_msgs','_trace','_tags','_formations','_lien'].forEach(k => {
+      if (S.cur[k] !== undefined) upd[k] = S.cur[k];
+    });
+    addTrace(upd, 'ITÉRATION_IA', msg.slice(0,60), 'Utilisateur');
+    const i = S.docs.findIndex(d => d._id===S.cur._id);
+    if (i>=0) S.docs[i] = upd;
+    S.cur = upd; saveDoc();
+    document.querySelectorAll('.tab-bar .tab-i').forEach((t,i) => t.classList.toggle('on', i===0));
+    document.querySelectorAll('.tab-pane').forEach((p,i) => p.classList.toggle('on', i===0));
+    renderFI00(upd); updDocActions();
+    const th = document.getElementById('cht');
+    if (th) th.textContent = 'Document mis à jour ✓';
+    if (cm) cm.scrollTop = cm.scrollHeight;
+    toast('Mis à jour', 'ok');
+  } catch(e) {
+    const th = document.getElementById('cht');
+    if (th) th.textContent = 'Erreur: '+e.message;
+    toast('Erreur', 'err');
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// EXPORT PDF PHAREC — pixel-perfect selon modèle de référence
+// ═══════════════════════════════════════════════════════
+function exportPDF() {
+  const doc = S.cur; if (!doc) { toast('Aucun document','err'); return; }
+  addTrace(doc,'EXPORT','PDF PHAREC','Utilisateur'); saveDoc();
+
+  const OR = '#E8711A'; // orange exact du modèle
+  const JN = '#FFD700'; // jaune exact
+  const JNL= '#FFFEF0'; // jaune clair lignes paires
+  const RG = '#CC0000'; // rouge
+  const VT = '#008800'; // vert
+  const BL = '#000099'; // bleu
+  const GR = '#DDDDDD'; // gris clair en-têtes
+  const NR = '#000000'; // noir
+
+  const etapes = doc.etapes||[];
+  const temps  = doc.temps||[];
+  const plans  = doc.plans||[];
+  const epi    = doc.epi||{};
+  const tl     = TYPE_L[doc.type]||'DOCUMENT';
+
+  // EPI string
+  const epiItems = [
+    epi.chaussures ? 'Chaussures de sécurité obligatoires' : '',
+    epi.auditives  ? 'Protections auditives recommandées'  : '',
+    epi.gants      ? 'Port des gants recommandé'           : '',
+    epi.chimique   ? '⚠ Produit chimique — voir fiche sécurité' : '',
+  ].filter(Boolean);
+
+  // Lignes du tableau opérations
+  const tabRows = etapes.map((e,i) => {
+    const bg    = i%2===0 ? '#FFFFFF' : JNL;
+    const ptCol = e.pt_cle==='S'?RG : e.pt_cle==='Q'?VT : e.pt_cle==='T'?BL : '#888';
+    const ptLbl = e.pt_cle==='S'?'+ S' : e.pt_cle==='Q'?'◆ Q' : e.pt_cle==='T'?'■ T' : '';
+    const photo = e.photo
+      ? '<img src="'+e.photo+'" style="display:block;max-width:100%;max-height:25mm;object-fit:contain;margin-top:1mm" alt="">'
+      : '';
+    return '<tr style="background:'+bg+'">'
+      +'<td style="width:5.05mm;text-align:center;vertical-align:middle;font-weight:700;font-size:7.5pt;border:0.3pt solid #ccc;padding:1mm 0.5mm">'+( e.numero||i+1)+'</td>'
+      +'<td style="width:55.4mm;vertical-align:top;font-size:7.5pt;border:0.3pt solid #ccc;padding:1mm 1.5mm;line-height:1.45">'+( e.description||e.titre||'')+'</td>'
+      +'<td style="width:7.07mm;text-align:center;vertical-align:middle;font-weight:700;font-size:7.5pt;color:'+ptCol+';border:0.3pt solid #ccc;padding:1mm 0.5mm">'+ptLbl+'</td>'
+      +'<td style="width:33.96mm;vertical-align:top;font-size:7pt;border:0.3pt solid #ccc;padding:1mm 1.5mm;line-height:1.4">'+( e.points_cles||'')+photo+'</td>'
+      +'</tr>';
+  }).join('');
+
+  // Photo produit
+  const photoProduit = doc.photo_produit
+    ? '<img src="'+doc.photo_produit+'" style="max-width:100%;max-height:34mm;object-fit:contain;display:block;margin:auto" alt="">'
+    : '<div style="color:#bbb;font-size:7pt;text-align:center;padding:5mm 2mm;font-style:italic">Photo produit assemblé</div>';
+
+  // Lignes temps alloué (2 lignes)
+  const tempsR = [0,1].map(i =>
+    '<tr><td style="padding:0.8mm 1.5mm;font-size:7.5pt;border-bottom:0.3pt solid #eee;border-right:0.3pt solid #eee;width:30.75mm">'+((temps[i]||{}).option||'')+'</td>'
+    +'<td style="padding:0.8mm 1.5mm;font-size:7.5pt;border-bottom:0.3pt solid #eee">'+((temps[i]||{}).temps||'')+'</td></tr>'
+  ).join('');
+
+  // Lignes plans (2 lignes)
+  const plansR = [0,1].map(i =>
+    '<tr><td style="padding:0.8mm 1.5mm;font-size:7.5pt;border-bottom:0.3pt solid #eee;border-right:0.3pt solid #eee;width:36.9mm">'+((plans[i]||{}).designation||'')+'</td>'
+    +'<td style="padding:0.8mm 1.5mm;font-size:7.5pt;border-bottom:0.3pt solid #eee">'+((plans[i]||{}).reference||'')+'</td></tr>'
+  ).join('');
+
+  const html = '<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8">'
+  +'<style>'
+  +'*{margin:0;padding:0;box-sizing:border-box}'
+  +'@page{size:A4 portrait;margin:4.5mm}'
+  +'body{font-family:Arial,Helvetica,sans-serif;background:#fff;color:#000;width:201mm}'
+  +'table{border-collapse:collapse;width:100%}'
+  +'</style></head><body>'
+
+  // ── EN-TÊTE ORANGE (h=2.25cm=22.5mm) ──
+  // L1 : FICHE D'INSTRUCTIONS (l=0→12.06cm) + Ref (l=12.51→8.04cm) h=8.5mm
+  +'<table style="width:201mm;margin-bottom:0">'
+    +'<tr>'
+      +'<td style="background:'+OR+';width:121.5mm;height:8.5mm;padding:1.5mm 2.5mm;font-size:14pt;font-weight:700;color:#fff;vertical-align:middle;border-right:0.5pt solid rgba(255,255,255,.3)">FICHE D&#39;INSTRUCTIONS</td>'
+      +'<td style="background:'+OR+';width:79.5mm;height:8.5mm;padding:1.5mm 2.5mm;font-size:12pt;font-weight:700;color:#fff;vertical-align:middle;text-align:right">'+( doc._ref||'')+'</td>'
+    +'</tr>'
+  +'</table>'
+  // L2 : Titre h=7.5mm
+  +'<table style="width:201mm">'
+    +'<tr><td style="background:'+OR+';height:7.5mm;padding:1mm 2.5mm;font-size:10pt;color:#fff;vertical-align:middle;font-style:italic;border-top:0.5pt solid rgba(255,255,255,.25)">'+( doc.titre||'')+'</td></tr>'
+  +'</table>'
+  // L3 : Indice/Date/Rédigé h=6.5mm
+  +'<table style="width:201mm">'
+    +'<tr>'
+      +'<td style="background:'+OR+';width:44.6mm;height:6.5mm;padding:0.8mm 2.5mm;font-size:7.5pt;font-weight:700;color:#fff;vertical-align:middle;border-top:0.5pt solid rgba(255,255,255,.25);border-right:0.5pt solid rgba(255,255,255,.25)">'+( doc._indice||'A')+'</td>'
+      +'<td style="background:'+OR+';width:81.0mm;height:6.5mm;padding:0.8mm 2.5mm;font-size:7.5pt;font-weight:700;color:#fff;vertical-align:middle;border-top:0.5pt solid rgba(255,255,255,.25);border-right:0.5pt solid rgba(255,255,255,.25)">'+( doc._date||'')+'</td>'
+      +'<td style="background:'+OR+';width:75.4mm;height:6.5mm;padding:0.8mm 2.5mm;font-size:7.5pt;font-weight:700;color:#fff;vertical-align:middle;border-top:0.5pt solid rgba(255,255,255,.25)">'+( doc._op||'')+'</td>'
+    +'</tr>'
+  +'</table>'
+
+  // ── ZONE MILIEU : photo + temps + plans (h=3.48cm=34.8mm) ──
+  +'<table style="width:201mm;border:0.5pt solid #ccc;border-top:none">'
+    +'<tr>'
+      // Photo produit (w=7.8cm=78mm)
+      +'<td style="width:78mm;min-height:34.8mm;border-right:0.5pt solid #ccc;vertical-align:middle;background:#f9f9f9;padding:1mm">'+photoProduit+'</td>'
+      // Colonne droite
+      +'<td style="vertical-align:top;padding:0">'
+        // TEMPS ALLOUÉ
+        +'<div style="padding:0.8mm 1.8mm;font-size:9pt;font-weight:700;color:'+RG+';border-bottom:0.3pt solid #ddd">TEMPS ALLOUÉ</div>'
+        +'<table style="width:100%">'
+          +'<tr style="background:'+GR+'"><th style="width:50%;padding:0.5mm 1.5mm;font-size:7.5pt;font-weight:700;border-right:0.3pt solid #bbb;text-align:left">Option</th><th style="padding:0.5mm 1.5mm;font-size:7.5pt;font-weight:700;text-align:left">Temps</th></tr>'
+          +tempsR
+        +'</table>'
+        // PLANS
+        +'<div style="padding:0.8mm 1.8mm;font-size:9pt;font-weight:700;color:'+RG+';border-top:0.5pt solid #ddd;border-bottom:0.3pt solid #ddd">Plans</div>'
+        +'<table style="width:100%">'
+          +'<tr style="background:'+GR+'"><th style="width:60%;padding:0.5mm 1.5mm;font-size:7.5pt;font-weight:700;border-right:0.3pt solid #bbb;text-align:left">Désignation</th><th style="padding:0.5mm 1.5mm;font-size:7.5pt;font-weight:700;text-align:left">Référence</th></tr>'
+          +plansR
+        +'</table>'
+      +'</td>'
+    +'</tr>'
+  +'</table>'
+
+  // ── BANDE EPI (h=2.6cm=26mm) ──
+  +'<table style="width:201mm;border:0.5pt solid #ccc;border-top:none">'
+    +'<tr>'
+      // EPI gauche (w≈11.5cm)
+      +'<td style="width:116mm;vertical-align:middle;padding:1.5mm 2mm">'
+        +epiItems.map(e=>'<div style="font-size:7.5pt;color:#333;margin-bottom:1mm">◉ '+e+'</div>').join('')
+      +'</td>'
+      // Droite
+      +'<td style="vertical-align:top;padding:1.5mm 2mm;border-left:0.5pt solid #ccc">'
+        +'<div style="font-size:7.5pt;color:#333;margin-bottom:2mm">Port des gants recommandé</div>'
+        +'<div style="font-size:7pt;color:'+RG+';font-style:italic;line-height:1.4">&#9888;  En cas d&#39;emploi de produit chimique, se reporter &#224; la fiche de s&#233;curit&#233;.</div>'
+      +'</td>'
+    +'</tr>'
+  +'</table>'
+
+  // ── TABLEAU DES OPÉRATIONS ──
+  // En-têtes jaunes
+  +'<table style="width:201mm;border:0.5pt solid #ccc;border-top:none">'
+    +'<thead>'
+      +'<tr style="background:'+JN+'">'
+        +'<th style="width:5.05mm;padding:1mm 0.5mm;font-size:8pt;font-weight:700;border:0.3pt solid #bbb;text-align:center">N°</th>'
+        +'<th style="width:55.4mm;padding:1mm 1.5mm;font-size:8pt;font-weight:700;border:0.3pt solid #bbb;text-align:left">DESCRIPTION DES OPÉRATIONS</th>'
+        +'<th style="width:7.07mm;padding:1mm 0.5mm;font-size:7.5pt;font-weight:700;border:0.3pt solid #bbb;text-align:center">Pt clé</th>'
+        +'<th style="width:33.96mm;padding:1mm 1.5mm;font-size:8pt;font-weight:700;border:0.3pt solid #bbb;text-align:left">Points Clés  /  Photos</th>'
+      +'</tr>'
+      // Sous-en-têtes sécurité/qualité/technique
+      +'<tr>'
+        +'<th style="border:0.3pt solid #ddd;padding:0"></th>'
+        +'<th style="border:0.3pt solid #ddd;padding:0"></th>'
+        +'<th style="border:0.3pt solid #ddd;padding:0"></th>'
+        +'<th style="padding:0;border:0.3pt solid #ddd">'
+          +'<div style="display:flex">'
+            +'<span style="flex:1;padding:0.8mm 1mm;font-size:6.5pt;font-weight:700;background:#ffe0e0;color:'+RG+'">+ sécurité</span>'
+            +'<span style="flex:1;padding:0.8mm 1mm;font-size:6.5pt;font-weight:700;background:#e0ffe0;color:'+VT+'">◆ qualité</span>'
+            +'<span style="flex:1;padding:0.8mm 1mm;font-size:6.5pt;font-weight:700;background:#e0e8ff;color:'+BL+'">■ technique</span>'
+          +'</div>'
+        +'</th>'
+      +'</tr>'
+    +'</thead>'
+    +'<tbody>'+tabRows+'</tbody>'
+  +'</table>'
+
+  // ── PIED DE PAGE ──
+  +'<div style="text-align:center;font-size:6.5pt;color:#888;margin-top:1.5mm;padding-top:1mm;border-top:0.3pt solid #eee">'
+    +'GenerationStandard  |  '+( doc._ref||'')+' — '+(doc._version||'v1')+' — '+(doc._date||'')+(doc._lien?' — '+doc._lien:'')
+  +'</div>'
+
+  +'</body></html>';
+
+  // Téléchargement direct
+  const blob = new Blob([html], {type:'text/html;charset=utf-8'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = (doc._ref||'FI-00')+'.html';
+  document.body.appendChild(a);
+  if(a.click) a.click();
+  URL.revokeObjectURL(url);
+  toast('FI-00 téléchargée — ouvrez dans Chrome puis Ctrl+P → Enregistrer en PDF','ok');
+}
+
+
+// ═══════════════════════════════════════════════════════
+// EXPORT DOC
+// ═══════════════════════════════════════════════════════
+function exportDOC() {
+  const doc = S.cur; if (!doc) { toast('Aucun document','err'); return; }
+  addTrace(doc,'EXPORT','DOC','Utilisateur'); saveDoc();
+  const er = s => String(s||'')
+    .replace(/é/g,"\\'e9").replace(/è/g,"\\'e8").replace(/ê/g,"\\'ea")
+    .replace(/à/g,"\\'e0").replace(/â/g,"\\'e2").replace(/î/g,"\\'ee")
+    .replace(/ô/g,"\\'f4").replace(/û/g,"\\'fb").replace(/ù/g,"\\'f9")
+    .replace(/ç/g,"\\'e7").replace(/É/g,"\\'c9").replace(/°/g,"\\'b0");
+  let rtf = `{\\rtf1\\ansi\\deff0{\\fonttbl{\\f0\\fswiss Arial;}}\\f0\\fs20\n{\\b\\fs28 ${er(TYPE_L[doc.type]||'DOCUMENT')}}\\par{\\b\\fs24 ${er(doc.titre||'')}}\\par{\\f0\\fs16 ${er(doc._ref)} - Poste ${er(doc._poste)} - ${er(doc._op)} - ${er(doc._date)}}\\par\\par`;
+  if (doc.description_courte) rtf += `{\\i ${er(doc.description_courte)}}\\par\\par`;
+  if (doc.etapes?.length) {
+    rtf += `{\\b ETAPES}\\par`;
+    doc.etapes.forEach(e => {
+      rtf += `{\\b ${e.numero}. ${er(e.titre||e.description?.slice(0,40)||'')}}\\par   ${er(e.description||'')}\\par`;
+      if (e.points_cles) rtf += `   {\\i ${er(e.points_cles)}}\\par`;
+      rtf += `\\par`;
+    });
+  }
+  rtf += '}';
+  const blob = new Blob([rtf], {type:'application/msword'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = (doc._ref||'document')+'.doc';
+  document.body.appendChild(a);
+  if (a.click) a.click();
+  URL.revokeObjectURL(a.href);
+  toast('.doc téléchargé','ok');
+}
+
+// ═══════════════════════════════════════════════════════
+// EXPORT REGISTRE FORMATION
+// ═══════════════════════════════════════════════════════
+function exportFormPDF() {
+  const doc = S.cur; if (!doc) { toast('Aucun document','err'); return; }
+  const forms = doc._formations||[];
+  const iframe = document.createElement('iframe');
+  iframe.style.cssText = 'position:fixed;left:-9999px;top:-9999px;width:794px;height:1123px';
+  document.body.appendChild(iframe);
+  const W=iframe.contentWindow, D=iframe.contentDocument||W.document;
+  const rows = forms.map((f,i)=>
+    `<tr><td>${i+1}</td><td>${f.nom}</td><td>${f.date}</td><td>${f.version}</td><td>${f.formateur}</td><td style="text-align:center">${f.signe?'✅':''}</td><td style="width:80px"></td></tr>`
+  ).join('') || '<tr><td colspan="7" style="text-align:center;color:#aaa">Aucune formation</td></tr>';
+  D.open(); D.write(`<html><head><meta charset="UTF-8"><style>
+body{font-family:Arial;font-size:10px;padding:24px}
+h2{color:#1A2E4A;font-size:13px;margin-bottom:4px}
+.meta{font-size:8px;color:#888;margin-bottom:16px}
+table{width:100%;border-collapse:collapse}
+th{background:#1A2E4A;color:#fff;padding:6px 8px;text-align:left;font-size:8.5px}
+td{border:1px solid #ddd;padding:5px 8px;font-size:8.5px}
+tr:nth-child(even)td{background:#f8fafc}
+.foot{text-align:center;font-size:7px;color:#aaa;margin-top:12px}
+</style></head><body>
+<h2>Registre de Formation — ISO 9001 §7.2</h2>
+<div class="meta">${doc._ref} · ${doc.titre||''} · ${doc._version||'v1'} · Poste ${doc._poste}</div>
+<table><tr><th>#</th><th>Nom Prénom</th><th>Date</th><th>Version</th><th>Formateur</th><th>Signé</th><th>Signature manuscrite</th></tr>${rows}</table>
+<div class="foot">GenerationStandard · ${new Date().toLocaleDateString('fr-FR')}</div>
+</body></html>`); D.close();
+  setTimeout(()=>{ W.focus(); W.print(); setTimeout(()=>iframe.remove(),2000); toast('Registre lancé','ok'); },600);
+}
+
+// ═══════════════════════════════════════════════════════
+// MAIL
+// ═══════════════════════════════════════════════════════
+function sendMailAuto() {
+  const doc = S.cur; if (!doc||!S.p.email) return;
+  const subj = encodeURIComponent(`[GS] ${doc._ref} — ${doc.titre||''} — à valider`);
+  const body = encodeURIComponent(`Bonjour,\n\nDocument soumis pour validation :\n\nRéférence : ${doc._ref}\nTitre : ${doc.titre||''}\nPoste : ${doc._poste}\nOpérateur : ${doc._op}\nVersion : ${doc._version||'v1'}\n\n---\nGenerationStandard`);
+  let mailto = `mailto:${encodeURIComponent(S.p.email)}?subject=${subj}&body=${body}`;
+  if (S.p.cc) mailto += `&cc=${encodeURIComponent(S.p.cc)}`;
+  window.location.href = mailto;
+}
+function sendMail() {
+  const doc = S.cur; if (!doc) { toast('Aucun document','err'); return; }
+  const toEl  = document.getElementById('mail-to');
+  const ccEl  = document.getElementById('mail-cc');
+  const msgEl = document.getElementById('mail-msg');
+  const to  = toEl  ? toEl.value.trim()  : '';
+  const cc  = ccEl  ? ccEl.value.trim()  : '';
+  const msg = msgEl ? msgEl.value.trim() : '';
+  if (!to) { toast('Saisissez une adresse','err'); return; }
+  const tl = TYPE_L[doc.type]||'DOCUMENT';
+  const subj = encodeURIComponent(`[GenerationStandard] ${doc._ref} — ${doc.titre||''}`);
+  let corps = `Bonjour,\n\n${doc._ref} — ${tl}\n${doc.titre||''}\nPoste : ${doc._poste} · Opérateur : ${doc._op} · ${doc._date}\nStatut : ${doc._statut} · ${doc._version||'v1'}\n`;
+  if (doc._lien) corps += `Lien qualité : ${doc._lien}\n`;
+  if (msg) corps += `\n${msg}\n`;
+  corps += '\n---\nGenerationStandard';
+  let mailto = `mailto:${encodeURIComponent(to)}?subject=${subj}&body=${encodeURIComponent(corps)}`;
+  if (cc) mailto += `&cc=${encodeURIComponent(cc)}`;
+  window.location.href = mailto;
+  addTrace(doc,'EXPORT','Mail envoyé à '+to,'Utilisateur');
+  saveDoc(); toast('Mail ouvert','ok');
+}
+
+// ═══════════════════════════════════════════════════════
+// BIBLIOTHÈQUE
+// ═══════════════════════════════════════════════════════
+function renderBiblio() {
+  const q  = (document.getElementById('bib-q')?.value||'').toLowerCase();
+  const st = document.getElementById('bib-st')?.value||'';
+  const docs = S.docs.filter(d => {
+    const mq = !q || (d.titre||'').toLowerCase().includes(q) || (d._ref||'').toLowerCase().includes(q) || (d._poste||'').includes(q);
+    const ms = !st || d._statut===st;
+    return mq && ms;
+  });
+  const el = document.getElementById('bib-list');
+  if (!el) return;
+  if (!docs.length) {
+    el.innerHTML = `<div class="empty"><div class="empty-i">📭</div><div class="empty-t">Aucun document${q?' pour cette recherche':''}.<br>Créez-en un !</div></div>`;
+    return;
+  }
+  el.innerHTML = docs.map(d => {
+    const tags = (d._tags||[]).map(t => `<span style="display:inline-block;padding:1px 6px;border-radius:10px;font-size:.6rem;font-weight:700;background:${t.c}22;color:${t.c}">${esc(t.t)}</span>`).join('');
+    const fo = (d._formations||[]).length;
+    const nbPh = (d.etapes||[]).filter(e=>e.photo).length + (d.photo_produit?1:0);
+    return `<div class="doc-item" onclick="openDoc(${d._id})">
+      <div style="flex:1">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;flex-wrap:wrap">
+          <span class="doc-item-ref">${esc(d._ref)}</span>
+          <span class="bdg ${statBdg(d._statut)}">${d._statut||'BROUILLON'}</span>
+          ${fo?`<span style="font-size:.62rem;color:var(--vi)">🎓 ${fo}</span>`:''}
+          ${nbPh?`<span style="font-size:.62rem;color:var(--gr)">📷 ${nbPh}</span>`:''}
+        </div>
+        <div class="doc-item-title">${esc(d.titre||'Sans titre')}</div>
+        <div class="doc-item-meta">Poste ${esc(d._poste)} · ${esc(d._op)} · ${esc(d._date)} · ${d._version||'v1'}</div>
+        ${tags?`<div class="doc-item-tags">${tags}</div>`:''}
+      </div>
+      <div style="font-size:1.2rem;color:var(--grl);padding-left:4px">›</div>
+    </div>`;
+  }).join('');
+}
+function openDoc(id) {
+  const doc = S.docs.find(d => d._id===id);
+  if (!doc) return;
+  loadPhotos(doc);
+  S.cur = doc;
+  renderFI00(doc);
+  updDocActions();
+  // Réinitialiser le tab sur Document
+  document.querySelectorAll('.tab-bar .tab-i').forEach((t,i)=>{ t.classList.toggle('on',i===0); });
+  document.querySelectorAll('.tab-pane').forEach((p,i)=>{ p.classList.toggle('on',i===0); });
+  const _a=document.getElementById('fi-actions-top');
+  if(_a)_a.style.display='';
+  // bouton + étape — pas critique si absent
+  goPage('doc');
+}
+
+// ═══════════════════════════════════════════════════════
+// PARAMÈTRES
+// ═══════════════════════════════════════════════════════
+function loadParams() {
+  const set = (id,v) => { const e=document.getElementById(id); if(e)e.value=v||''; };
+  set('p-unite',S.p.unite); set('p-ent',S.p.ent);
+  set('p-email',S.p.email); set('p-cc',S.p.cc);
+  set('p-key',   S.ukey  ? '••••••••••••••' : '');
+  set('p-proxy', S.proxy || '');
+  updStats();
+  // Charger QR si URL déjà sauvegardée
+  const savedQr = localStorage.getItem('gs5_qr_url');
+  if (savedQr) {
+    const inp = document.getElementById('qr-url-inp');
+    if (inp && !inp.value) inp.value = savedQr;
+    setTimeout(function() { renderQR(savedQr); }, 150);
+  }
+}
+function saveParams() {
+  ['unite','ent','email','cc'].forEach(k => {
+    const e = document.getElementById('p-'+k.replace('email','email').replace('cc','cc'));
+    if (e) S.p[k]=e.value;
+  });
+  S.p.unite = document.getElementById('p-unite')?.value||'';
+  S.p.ent   = document.getElementById('p-ent')?.value||'';
+  S.p.email = document.getElementById('p-email')?.value||'';
+  S.p.cc    = document.getElementById('p-cc')?.value||'';
+  localStorage.setItem('gs5_params', JSON.stringify(S.p));
+  toast('Paramètres sauvegardés','ok');
+}
+function saveKey() {
+  const k = document.getElementById('p-key')?.value.trim();
+  if (!k||k.includes('•')) { toast('Clé invalide — elle doit commencer par sk-ant-','err'); return; }
+  if (!k.startsWith('sk-ant-')) { toast('Clé invalide — elle doit commencer par sk-ant-','err'); return; }
+  S.ukey = k; localStorage.setItem('gs5_ukey',k);
+  const el = document.getElementById('p-key'); if(el) el.value='••••••••••••••';
+  toast('Clé enregistrée ✓','ok');
+}
+function saveProxy() {
+  const el = document.getElementById('p-proxy');
+  const v  = el ? el.value.trim() : '';
+  if (!v) { S.proxy=''; localStorage.removeItem('gs5_proxy'); toast('Proxy effacé','info'); return; }
+  if (!v.startsWith('https://')) { toast('URL invalide — doit commencer par https://','err'); return; }
+  S.proxy = v; localStorage.setItem('gs5_proxy', v);
+  toast('Proxy enregistré ✓','ok');
+}
+function resetKey() {
+  S.ukey=''; localStorage.removeItem('gs5_ukey');
+  const e=document.getElementById('p-key'); if(e)e.value='';
+  toast('Clé effacée','info');
+}
+function updStats() {
+  const set=(id,v)=>{ const e=document.getElementById(id); if(e)e.textContent=v; };
+  set('st-tot',  S.docs.length);
+  set('st-val',  S.docs.filter(d=>d._statut==='VALIDÉ').length);
+  set('st-frm',  S.docs.reduce((a,d)=>a+(d._formations?.length||0),0));
+  set('st-att',  S.docs.filter(d=>d._statut==='EN ATTENTE').length);
+  // Stats photos
+  try {
+    const ph = getPhotoStats();
+    set('st-ph-count', ph.count);
+    set('st-ph-kb', ph.kb);
+  } catch(e) {}
+}
+function updNavBadge() {
+  const att = S.docs.filter(d=>d._statut==='EN ATTENTE').length;
+  const tb  = document.getElementById('top-badge');
+  if (tb) tb.style.display = att?'':'none';
+  const nb  = document.getElementById('nb-biblio');
+  let badge = nb?.querySelector('.ni-badge');
+  if (att) {
+    if (!badge&&nb) { badge=document.createElement('span'); badge.className='ni-badge'; nb.appendChild(badge); }
+    if (badge) badge.textContent=att;
+  } else if (badge) badge.remove();
+}
+function clearAll() {
+  if (!confirm('Effacer tous les documents ?')) return;
+  // Supprimer aussi les photos stockées séparément
+  for (const d of S.docs) {
+    try { localStorage.removeItem('gs5_ph_'+d._id+'_p'); } catch(e) {}
+    if (d.etapes) d.etapes.forEach((_,i) => {
+      try { localStorage.removeItem('gs5_ph_'+d._id+'_e'+i); } catch(e) {}
+    });
+  }
+  S.docs=[]; S.cur=null; sv(); renderBiblio(); updStats(); updNavBadge();
+  toast('Bibliothèque vidée','info');
+}
+
+// ═══════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════
+// PWA manifest inline
+(function() {
+  const manifest = {
+    name: 'GenerationStandard',
+    short_name: 'GenStd',
+    start_url: './',
+    display: 'standalone',
+    background_color: '#1A2E4A',
+    theme_color: '#1A2E4A',
+    description: 'Générateur de standards qualité et fiches de poste FI-00',
+    icons: [{
+      src: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="%231A2E4A"/><text y=".9em" font-size="80" x="10">📋</text></svg>',
+      sizes: 'any',
+      type: 'image/svg+xml'
+    }]
+  };
+  const blob = new Blob([JSON.stringify(manifest)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const link = document.getElementById('pwa-manifest');
+  if (link) link.href = url;
+})();
+
+// Restaurer photos pour le doc courant si besoin
+updStats(); updNavBadge(); renderBiblio();
+
+
+// Si un doc en cours existe déjà
+if (S.cur) { renderFI00(S.cur); updDocActions(); }
+
+// ═══════════════════════════════════════════════════════
+// QR CODE
+// ═══════════════════════════════════════════════════════
+function genQR() {
+  const inp = document.getElementById('qr-url-inp');
+  const url = inp ? inp.value.trim() : '';
+  if (!url) { toast('Saisissez une URL', 'err'); return; }
+  if (!url.startsWith('http')) { toast('URL invalide — doit commencer par https://', 'err'); return; }
+  localStorage.setItem('gs5_qr_url', url);
+  renderQR(url);
+}
+
+function renderQR(url) {
+  if (!url) return;
+  const canvas      = document.getElementById('qr-canvas');
+  const placeholder = document.getElementById('qr-placeholder');
+  const urlDisplay  = document.getElementById('qr-url-display');
+  const actions     = document.getElementById('qr-actions');
+  const sub         = document.getElementById('qr-sub');
+  if (!canvas) return;
+  try {
+    const mat  = qrMatrix(url);
+    const n    = mat.length;
+    const size = 220;
+    const cell = size / (n + 8); // quiet zone de 4 modules de chaque côté
+    const off  = cell * 4;
+    canvas.width  = size;
+    canvas.height = size;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#ffffff'; ctx.fillRect(0,0,size,size);
+    ctx.fillStyle = '#000000';
+    for (let r=0;r<n;r++) for (let c=0;c<n;c++) {
+      if (mat[r][c]) {
+        ctx.fillRect(
+          Math.round(off + c*cell), Math.round(off + r*cell),
+          Math.ceil(cell), Math.ceil(cell)
+        );
+      }
+    }
+    // Logo GS au centre
+    const cx=size/2, cy=size/2, r2=14;
+    ctx.fillStyle='#1A2E4A';
+    ctx.beginPath(); ctx.arc(cx,cy,r2,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='#fff'; ctx.font='bold 10px Arial';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('GS',cx,cy);
+
+    canvas.style.display='block';
+    if(placeholder) placeholder.style.display='none';
+    if(urlDisplay)  { urlDisplay.textContent=url; urlDisplay.style.display='block'; }
+    if(actions)     actions.style.display='block';
+    if(sub)         sub.textContent='Scannez pour ouvrir l\'app directement.';
+    toast('QR code prêt ✓','ok');
+  } catch(e) {
+    if(placeholder) {
+      placeholder.innerHTML='<div style="text-align:center;padding:10px">'
+        +'<div style="font-size:.75rem;color:var(--bl);word-break:break-all;font-weight:700">'+url+'</div>'
+        +'<div style="font-size:.68rem;color:var(--gr);margin-top:6px">Copiez ce lien sur votre téléphone.</div>'
+        +'</div>';
+      placeholder.style.display='block';
+      canvas.style.display='none';
+    }
+  }
+}
+
+// QR Code complet avec Reed-Solomon - ISO 18004
+// Adapté de nayuki.io/page/qr-code-generator-library (MIT)
+
+function qrMatrix(text) {
+  // UTF-8 encode
+  const bytes = [];
+  for(let i=0;i<text.length;i++){
+    const c=text.charCodeAt(i);
+    if(c<128)bytes.push(c);
+    else if(c<2048){bytes.push(192|(c>>6));bytes.push(128|(c&63));}
+    else{bytes.push(224|(c>>12));bytes.push(128|((c>>6)&63));bytes.push(128|(c&63));}
+  }
+  
+  // Version selection ECC L
+  const CAP_L=[19,34,55,80,108,136,154,192,230,271];
+  // EC codewords per block, blocks group1, data per block g1, blocks g2, data per block g2
+  const EC=[
+    [7,1,19,0,0],[10,1,34,0,0],[15,1,55,0,0],[20,2,40,0,0],
+    [26,2,54,0,0],[18,4,36,0,0],[20,4,40,0,0],[24,4,48,0,0],
+    [30,5,46,0,0],[18,5,46,0,0]
+  ];
+  let version=1;
+  for(let v=0;v<CAP_L.length;v++){if(bytes.length<=CAP_L[v]){version=v+1;break;}}
+  
+  const [ecPerBlock,b1,d1,b2,d2]=EC[version-1];
+  const n=17+4*version;
+  const mat=Array.from({length:n},()=>new Array(n).fill(0));
+  const fn=Array.from({length:n},()=>new Array(n).fill(false));
+  
+  // ── Placer les modules fonctionnels ──
+  function setMod(r,c,v){if(r>=0&&r<n&&c>=0&&c<n){mat[r][c]=v;fn[r][c]=true;}}
+  
+  // Finder patterns
+  function finder(tr,tc){
+    for(let r=-1;r<8;r++)for(let c=-1;c<8;c++){
+      if(r<-1||r>7||c<-1||c>7)continue;
+      const inner=r>=0&&r<7&&c>=0&&c<7;
+      const v=inner?((r===0||r===6||c===0||c===6)?1:(r>=2&&r<=4&&c>=2&&c<=4)?1:0):0;
+      setMod(tr+r,tc+c,v);
+    }
+  }
+  finder(0,0);finder(0,n-7);finder(n-7,0);
+  
+  // Timing
+  for(let i=8;i<n-8;i++){
+    if(!fn[6][i]){mat[6][i]=i%2?0:1;fn[6][i]=true;}
+    if(!fn[i][6]){mat[i][6]=i%2?0:1;fn[i][6]=true;}
+  }
+  
+  // Dark module
+  setMod(4*version+9,8,1);
+  
+  // Alignment patterns (version 2+)
+  const ALN={2:[6,18],3:[6,22],4:[6,26,2],5:[6,30],6:[6,34],7:[6,22,38],8:[6,24,42],9:[6,28,46],10:[6,28,50]};
+  if(version>=2&&ALN[version]){
+    const ap=ALN[version];
+    for(const ar of ap)for(const ac of ap){
+      if(!fn[ar][ac]){
+        for(let dr=-2;dr<=2;dr++)for(let dc=-2;dc<=2;dc++){
+          const v=(Math.abs(dr)===2||Math.abs(dc)===2)?1:(dr===0&&dc===0)?1:0;
+          setMod(ar+dr,ac+dc,v);
+        }
+      }
+    }
+  }
+  
+  // Réserver format info
+  const FP1=[[8,0],[8,1],[8,2],[8,3],[8,4],[8,5],[8,7],[8,8],[7,8],[5,8],[4,8],[3,8],[2,8],[1,8],[0,8]];
+  FP1.forEach(([r,c])=>{fn[r][c]=true;});
+  for(let i=0;i<8;i++){fn[8][n-1-i]=true;fn[n-1-i][8]=true;}
+  
+  // ── Reed-Solomon ──
+  function gfMul(a,b){
+    if(!a||!b)return 0;
+    const LOG=new Uint8Array(256),EXP=new Uint8Array(256);
+    let x=1;
+    for(let i=0;i<255;i++){EXP[i]=x;LOG[x]=i;x<<=1;if(x&256)x^=285;}
+    EXP[255]=EXP[0];
+    return EXP[(LOG[a]+LOG[b])%255];
+  }
+  function gfPoly(degree){
+    let g=[1];
+    for(let i=0;i<degree;i++){
+      const p=[0,...g];
+      const q=[...g,0];
+      const EXP=new Uint8Array(256);let x=1;
+      for(let j=0;j<255;j++){EXP[j]=x;x<<=1;if(x&256)x^=285;}
+      for(let j=0;j<p.length;j++)q[j]^=gfMul(p[j],EXP[i]);
+      g=q;
+    }
+    return g;
+  }
+  function rsEncode(data,ecLen){
+    const gen=gfPoly(ecLen);
+    const res=[...data,...new Array(ecLen).fill(0)];
+    for(let i=0;i<data.length;i++){
+      const c=res[i];if(!c)continue;
+      for(let j=0;j<gen.length;j++)res[i+j]^=gfMul(gen[j],c);
+    }
+    return res.slice(data.length);
+  }
+  
+  // ── Construire les codewords ──
+  const bits=[];
+  bits.push(0,1,0,0); // mode byte
+  const L=bytes.length;
+  for(let i=7;i>=0;i--)bits.push((L>>i)&1);
+  bytes.forEach(b=>{for(let i=7;i>=0;i--)bits.push((b>>i)&1);});
+  while(bits.length<CAP_L[version-1]*8-4)bits.push(0);
+  while(bits.length%8)bits.push(0);
+  const PAD=[0xEC,0x11];let pi=0;
+  while(bits.length<CAP_L[version-1]*8){const p=PAD[pi++%2];for(let i=7;i>=0;i--)bits.push((p>>i)&1);}
+  
+  // Bytes de données
+  const dataBytes=[];
+  for(let i=0;i<bits.length;i+=8){
+    let b=0;for(let j=0;j<8;j++)b=(b<<1)|bits[i+j];
+    dataBytes.push(b);
+  }
+  
+  // EC bytes
+  const ecBytes=rsEncode(dataBytes,ecPerBlock);
+  
+  // Interleaving (simple pour version 1 — 1 bloc)
+  const allBytes=[...dataBytes,...ecBytes];
+  
+  // Convertir en bits
+  const allBits=[];
+  allBytes.forEach(b=>{for(let i=7;i>=0;i--)allBits.push((b>>i)&1);});
+  // Remainder bits
+  const REM=[0,7,7,7,7,7,0,0,0,0,0,0,0,0];
+  for(let i=0;i<(REM[version-1]||0);i++)allBits.push(0);
+  
+  // ── Placer les données (zigzag, masque 0: (r+c)%2===0) ──
+  let bi=0;
+  let up=true;
+  for(let col=n-1;col>=1;col-=2){
+    if(col===6)col--;
+    for(let i=0;i<n;i++){
+      const r=up?n-1-i:i;
+      for(let dc=0;dc<2;dc++){
+        const c=col-dc;
+        if(fn[r][c])continue;
+        const bit=bi<allBits.length?allBits[bi++]:0;
+        // Masque 0: (r+c)%2===0
+        mat[r][c]=bit^(((r+c)%2===0)?1:0);
+      }
+    }
+    up=!up;
+  }
+  
+  // Format info ECC L, masque 0
+  // ECC L=01, masque=000 → data=01000 → 01000 101101010 XOR mask 101010000010010
+  const FMT=[1,1,0,0,1,1,0,0,1,0,1,1,1,0,0]; // ECC L masque 0 pré-calculé
+  FP1.forEach(([r,c],i)=>{mat[r][c]=FMT[i];});
+  for(let i=0;i<8;i++){mat[n-1-i][8]=FMT[i];}
+  for(let i=8;i<15;i++){mat[8][n-15+i]=FMT[i];}
+  
+  return mat;
+}
+
+function onQrUrlChange(val) {
+  if (val && val.startsWith('https://') && val.length > 25) {
+    clearTimeout(window._qrTimer);
+    window._qrTimer = setTimeout(function() { renderQR(val.trim()); }, 900);
+  }
+}
+
+function downloadQR() {
+  const canvas = document.getElementById('qr-canvas');
+  if (!canvas) return;
+  const a = document.createElement('a');
+  a.download = 'generationstandard-qrcode.png';
+  a.href = canvas.toDataURL('image/png');
+  document.body.appendChild(a);
+  if (a.click) a.click();
+  toast('QR code téléchargé', 'ok');
+}
+
+</script>
+</body>
+</html>
